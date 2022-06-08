@@ -1,0 +1,80 @@
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\appsettings.Development.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\appsettings.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.exe
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.deps.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.runtimeconfig.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\ref\Job Scheduling.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.pdb
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.OpenApi.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.AssemblyReference.cache
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.AssemblyInfoInputs.cache
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.AssemblyInfo.cs
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.CoreCompileInputs.cache
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\staticwebassets.build.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\staticwebassets.development.json
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\scopedcss\bundle\Job Scheduling.styles.css
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.CopyComplete
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\ref\Job Scheduling.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.pdb
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.genruntimeconfig.cache
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\System.Security.Permissions.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\System.Data.SqlClient.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-arm64\native\sni.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-x64\native\sni.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-x86\native\sni.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Castle.Core.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Castle.Windsor.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Dapper.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\a\source\repos\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\appsettings.Development.json
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\appsettings.json
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.exe
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.deps.json
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.runtimeconfig.json
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Job Scheduling.pdb
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Castle.Core.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Castle.Windsor.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Dapper.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.DotNet.PlatformAbstractions.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.Extensions.DependencyModel.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Microsoft.OpenApi.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\System.Data.SqlClient.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\System.Security.Permissions.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-arm64\native\sni.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-x64\native\sni.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win-x86\native\sni.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
+C:\workspace\Job Scheduling\Job Scheduling\bin\Debug\net6.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.AssemblyReference.cache
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.GeneratedMSBuildEditorConfig.editorconfig
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.AssemblyInfoInputs.cache
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.AssemblyInfo.cs
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.CoreCompileInputs.cache
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.MvcApplicationPartsAssemblyInfo.cs
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.MvcApplicationPartsAssemblyInfo.cache
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\staticwebassets.build.json
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\staticwebassets.development.json
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\scopedcss\bundle\Job Scheduling.styles.css
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.csproj.CopyComplete
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.dll
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\refint\Job Scheduling.dll
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.pdb
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\Job Scheduling.genruntimeconfig.cache
+C:\workspace\Job Scheduling\Job Scheduling\obj\Debug\net6.0\ref\Job Scheduling.dll
