@@ -40,7 +40,6 @@ jobs:
         run: mkdir _build  
 
       - name: MSBuild
-        working-directory: job_scheduling_ws
         run: msbuild "Job Scheduling.csproj" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
           
     
