@@ -51,8 +51,8 @@ jobs:
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
         with:
-          name: kagami-ws
-          path: "./_build/_PublishedWebsites/CYC"    
+          name: cyc_ws
+          path: "./_build/"    
           
   deploy:
     runs-on: self-hosted
@@ -61,7 +61,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
         with:
-          name: kagami-ws
+          name: cyc_ws
       - name: Deploy to IIS
         run: |
           Stop-IISSite -Name cyc_ws -Confirm:$false
