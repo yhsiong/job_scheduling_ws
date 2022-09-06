@@ -65,7 +65,7 @@ jobs:
       - name: Deploy to IIS
         run: |
           Stop-IISSite -Name cyc_ws -Confirm:$false
-          Copy-Item . C:/workspace/CYC/WS -Recurse -Force
+          Copy-Item _build C:/workspace/CYC/WS -Recurse -Force
           Start-IISSite -Name cyc_ws
   
     
