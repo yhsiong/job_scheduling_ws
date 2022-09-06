@@ -45,7 +45,7 @@ jobs:
 
       - name: Build
         working-directory:  ./
-        run: dotnet build "Job Scheduling.csproj" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
+        run: dotnet build "Job Scheduling.sln" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
           
     
       - name: Upload artifact for deployment job
