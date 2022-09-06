@@ -23,8 +23,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Setup MSBuild.exe
-        uses: warrenbuckley/Setup-MSBuild@v1
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: | 
+            3.1.x
+            5.0.x
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
           
@@ -39,9 +43,9 @@ jobs:
       - name: Create Build Directory
         run: mkdir _build  
 
-      - name: MSBuild
+      - name: Build
         working-directory:  ./
-        run: msbuild "Job Scheduling.csproj" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
+        run: dotnet build "Job Scheduling.csproj" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
           
     
       - name: Upload artifact for deployment job
