@@ -1,0 +1,68 @@
+name: Deploy CYC WS
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log Level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
+        
+  push:
+    branches: ["main"]
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup MSBuild.exe
+        uses: warrenbuckley/Setup-MSBuild@v1
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+          
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.2
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+          
+      - name: Restore Packages
+        run: nuget restore "Job Scheduling.sln"
+      
+      - name: Create Build Directory
+        run: mkdir _build  
+
+      - name: MSBuild
+        working-directory: CYC
+        run: msbuild "Job Scheduling.csproj" /t:Rebuild /p:configuration="Release" /p:outdir="../_build"
+          
+    
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: kagami-ws
+          path: "./_build/_PublishedWebsites/CYC"    
+          
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: kagami-ws
+      - name: Deploy to IIS
+        run: |
+          Stop-IISSite -Name cyc_ws -Confirm:$false
+          Copy-Item . C:/workspace/CYC/WS -Recurse -Force
+          Start-IISSite -Name cyc_ws
+  
+    
+        
