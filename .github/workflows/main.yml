@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: cyc_ws
-          path: "./_build/"    
+          path: ${{ github.workspace }}/_build/*"    
           
   deploy:
     runs-on: self-hosted
