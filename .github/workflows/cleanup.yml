@@ -1,0 +1,29 @@
+name: 'Artifacts Cleanup'
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log Level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      tags:
+        description: 'Test scenario tags'
+        required: false
+        type: boolean
+    
+  schedule:
+  - cron: '0 * * * *' # UTC
+
+jobs:
+  delete-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: kolpav/purge-artifacts-action@v1
+        with:
+          token: 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
+          expire-in: 30 minutes
