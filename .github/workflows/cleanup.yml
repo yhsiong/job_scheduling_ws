@@ -25,5 +25,5 @@ jobs:
     steps:
       - uses: kolpav/purge-artifacts-action@v1
         with:
-          token: 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
+          token: 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
           expire-in: 30 minutes
