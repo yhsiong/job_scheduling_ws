@@ -14,7 +14,7 @@ builder.Services.AddSession(options => {
 builder.Services.AddCors(options => {
 	options.AddPolicy(name: MyAllowOrigins, builder =>
 	{
-		builder.WithOrigins("http://localhost:8080", "https://localhost:8080").AllowAnyHeader().AllowAnyMethod();
+		builder.WithOrigins("http://localhost:8080", "https://localhost:8080", "https://cyc-ui.dev-code.tk").AllowAnyHeader().AllowAnyMethod();
 	});
 });
 builder.Services.AddDistributedMemoryCache();
