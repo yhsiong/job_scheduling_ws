@@ -1,8 +1,7 @@
 ﻿namespace Job_Scheduling.Model
 {
     public class Job_Doc
-    {
-        public int? job_id { get; set; }
+    { 
         public int? job_doc_id { get; set; }
         public int? job_doc_job_id { get; set; }
         public string job_doc_url { get; set; }

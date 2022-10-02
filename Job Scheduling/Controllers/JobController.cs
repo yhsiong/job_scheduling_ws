@@ -91,11 +91,11 @@ namespace Job_Scheduling.Controllers
         [Route("job")]
         public IActionResult insertJob(Job job)
         {
-             
-          if (string.IsNullOrEmpty(job.job_created_by))
-          {
-              return new JsonResult("No Session");
-          }
+
+            if (string.IsNullOrEmpty(job.job_created_by))
+            {
+                return new JsonResult("No Session");
+            }
             job.job_no = generateJobNo();
             job.job_created_at = DateTime.Now;
             job.job_status = "Active";
@@ -105,30 +105,44 @@ namespace Job_Scheduling.Controllers
                 {
                     // Creating SqlCommand objcet   
                     SqlCommand cm = new SqlCommand("insert into [job] " +
-                        "(job_no,job_quotation_no,job_remark,job_status, job_created_by,job_created_at) values " +
-                        "(@job_no, @job_quotation_no, @job_remark, @job_status, @job_created_by,@job_created_at)", connection);
+                        "(job_no,job_quotation_no,job_remark,job_status, job_created_by,job_created_at,job_address,job_postal_code,job_customer_name,job_customer_code,job_entity_name) OUTPUT INSERTED.[job_id] values " +
+                        "(@job_no, @job_quotation_no, @job_remark, @job_status, @job_created_by,@job_created_at,@job_address,@job_postal_code,@job_customer_name,@job_customer_code,@job_entity_name)", connection);
 
                     cm.Parameters.AddWithValue("@job_no", job.job_no);
                     cm.Parameters.AddWithValue("@job_remark", job.job_remark);
                     cm.Parameters.AddWithValue("@job_quotation_no", job.job_quotation_no);
+
+                    cm.Parameters.AddWithValue("@job_address", job.job_address);
+                    cm.Parameters.AddWithValue("@job_postal_code", job.job_postal_code);
                     cm.Parameters.AddWithValue("@job_status", job.job_status);
                     cm.Parameters.AddWithValue("@job_created_by", job.job_created_by);
                     cm.Parameters.AddWithValue("@job_created_at", job.job_created_at);
 
-                    
+                    cm.Parameters.AddWithValue("@job_customer_name", job.job_customer_name);
+                    cm.Parameters.AddWithValue("@job_customer_code", job.job_customer_code);
+                    cm.Parameters.AddWithValue("@job_entity_name", job.job_entity_name);
+                     
+
+
+
                     // Opening Connection  
                     connection.Open();
                     // Executing the SQL query  
-                     int result = cm.ExecuteNonQuery();
+                    Int64 result = (Int64)cm.ExecuteScalar();
                     if (result > 0)
                     {
+                        Job_Quo job_quo = new Job_Quo();
+                        job_quo.job_quo_job_id = int.Parse(result.ToString());
+                        job_quo.job_quo_created_by = job.job_created_by;
+                        job_quo.job_quo_quotation_no = job.job_quotation_no;
+                        insertJobQuo(job_quo);
                         return new JsonResult(job);
                     }
                     else
                     {
                         return new JsonResult("Error inserting");
                     }
-                    
+
                 }
             }
             catch (Exception e)
@@ -136,6 +150,58 @@ namespace Job_Scheduling.Controllers
                 return new JsonResult("OOPs, something went wrong.\n" + e);
             }
         }
+        [HttpPost]
+        [Route("job_quote")]
+        public IActionResult insertJobQuo(Job_Quo job_quo)
+        {
+            if (string.IsNullOrEmpty(job_quo.job_quo_created_by))
+            {
+                return new JsonResult("No Session");
+            }
+
+            job_quo.job_quo_created_at = DateTime.Now;
+            job_quo.job_quo_status = "Active";
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("insert into [job_quo] " +
+                        "(job_quo_job_id,job_quo_quotation_no,job_quo_status,job_quo_created_at,job_quo_created_by) values " +
+                        "(@job_quo_job_id,@job_quo_quotation_no,@job_quo_status,@job_quo_created_at,@job_quo_created_by) ", connection);
+                     
+                    cm.Parameters.AddWithValue("@job_quo_job_id", job_quo.job_quo_job_id);
+                    cm.Parameters.AddWithValue("@job_quo_quotation_no", job_quo.job_quo_quotation_no);
+                    cm.Parameters.AddWithValue("@job_quo_status", job_quo.job_quo_status);
+
+                    cm.Parameters.AddWithValue("@job_quo_created_at", job_quo.job_quo_created_at);
+                    cm.Parameters.AddWithValue("@job_quo_created_by", job_quo.job_quo_created_by); 
+
+
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    int result = cm.ExecuteNonQuery();
+                    if (result > 0)
+                    { 
+                        return new JsonResult(job_quo);
+                    }
+                    else
+                    {
+                        return new JsonResult("Error inserting");
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+        }
+
+
+        
         private string generateJobNo()
         {
             string jobNoPrefix = "JOB-";

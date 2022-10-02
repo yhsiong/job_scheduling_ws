@@ -10,7 +10,9 @@
         public string job_postal_code { get; set; }
         public string job_address { get; set; }
         public string job_customer_name { get; set; }
-        public string job_customer_code { get; set; } 
+        public string job_customer_code { get; set; }
+        public string job_entity_name { get; set; }
+        
         public string job_created_by { get; set; }
         public string job_updated_by { get; set; }
         public DateTime? job_created_at { get; set; }
