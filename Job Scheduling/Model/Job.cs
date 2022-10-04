@@ -8,6 +8,8 @@
         public string job_remark { get; set; }
         public string job_status { get; set; }
         public string job_postal_code { get; set; }
+        public string job_longtitude { get; set; }
+        public string job_latitude { get; set; }
         public string job_address { get; set; }
         public string job_customer_name { get; set; }
         public string job_customer_code { get; set; }
