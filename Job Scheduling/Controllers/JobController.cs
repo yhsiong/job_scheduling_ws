@@ -105,8 +105,8 @@ namespace Job_Scheduling.Controllers
                 {
                     // Creating SqlCommand objcet   
                     SqlCommand cm = new SqlCommand("insert into [job] " +
-                        "(job_no,job_quotation_no,job_remark,job_status, job_created_by,job_created_at,job_address,job_postal_code,job_customer_name,job_customer_code,job_entity_name) OUTPUT INSERTED.[job_id] values " +
-                        "(@job_no, @job_quotation_no, @job_remark, @job_status, @job_created_by,@job_created_at,@job_address,@job_postal_code,@job_customer_name,@job_customer_code,@job_entity_name)", connection);
+                        "(job_no,job_quotation_no,job_remark,job_status, job_created_by,job_created_at,job_address,job_postal_code,job_customer_name,job_customer_code,job_entity_name, job_latitude, job_longtitude) OUTPUT INSERTED.[job_id] values " +
+                        "(@job_no, @job_quotation_no, @job_remark, @job_status, @job_created_by,@job_created_at,@job_address,@job_postal_code,@job_customer_name,@job_customer_code,@job_entity_name, @job_latitude, @job_longtitude)", connection);
 
                     cm.Parameters.AddWithValue("@job_no", job.job_no);
                     cm.Parameters.AddWithValue("@job_remark", job.job_remark);
@@ -121,10 +121,10 @@ namespace Job_Scheduling.Controllers
                     cm.Parameters.AddWithValue("@job_customer_name", job.job_customer_name);
                     cm.Parameters.AddWithValue("@job_customer_code", job.job_customer_code);
                     cm.Parameters.AddWithValue("@job_entity_name", job.job_entity_name);
-                     
 
-
-
+                    cm.Parameters.AddWithValue("@job_latitude", job.job_latitude);
+                    cm.Parameters.AddWithValue("@job_longtitude", job.job_longtitude);
+                  
                     // Opening Connection  
                     connection.Open();
                     // Executing the SQL query  
@@ -200,8 +200,6 @@ namespace Job_Scheduling.Controllers
             }
         }
 
-
-        
         private string generateJobNo()
         {
             string jobNoPrefix = "JOB-";
@@ -307,7 +305,11 @@ namespace Job_Scheduling.Controllers
                     var jResult = JsonConvert.DeserializeObject<dynamic>(result);
                     if (jResult.results.Count > 0)
                     {
-                        return new JsonResult(new { postal_code = jResult.results[0]["POSTAL"].ToString() });
+                        return new JsonResult(new { 
+                            postal_code = jResult.results[0]["POSTAL"].ToString(),
+                            latitude = jResult.results[0]["LATITUDE"].ToString(),
+                            longtitude = jResult.results[0]["LONGTITUDE"].ToString()
+                        });
                     }
                     else {
                         return new JsonResult(new { postal_code = "Address not found"});
@@ -323,5 +325,91 @@ namespace Job_Scheduling.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("getLongLat")]
+        public IActionResult getLongLat(string postalCode)
+        {
+            // get user & Password
+            try
+            {
+                var url = "https://developers.onemap.sg/commonapi/search?searchVal=" + postalCode + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+
+                httpRequest.Accept = "application/json";
+
+
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
+                    if (jResult.results.Count > 0)
+                    {
+                        return new JsonResult(new { 
+                            latitude = jResult.results[0]["LATITUDE"].ToString(),
+                            longtitude = jResult.results[0]["LONGTITUDE"].ToString(),
+                        });
+                    }
+                    
+                    else
+                    {
+                        return new JsonResult(new { postal_code = "Address not found" });
+                    }
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
+        [HttpGet]
+        [Route("getSiteDistance")]
+        public IActionResult getSiteDistance(string address)
+        {
+            // get user & Password
+            try
+            {
+                var url = "https://developers.onemap.sg/commonapi/search?searchVal=" + address + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+
+                httpRequest.Accept = "application/json";
+
+
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
+                    if (jResult.results.Count > 0)
+                    {
+                        return new JsonResult(new { postal_code = jResult.results[0]["POSTAL"].ToString() });
+                    }
+                    else
+                    {
+                        return new JsonResult(new { postal_code = "Address not found" });
+                    }
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
+
     }
 }
