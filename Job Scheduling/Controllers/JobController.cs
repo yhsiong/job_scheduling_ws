@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Data.SqlClient;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace Job_Scheduling.Controllers
@@ -200,42 +201,6 @@ namespace Job_Scheduling.Controllers
             }
         }
 
-        private string generateJobNo()
-        {
-            string jobNoPrefix = "JOB-";
-            int formatLenght = 5;
-            string generatedJobNo = string.Empty;
-                
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select top 1 * from [job] order by job_id desc", connection);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    int last_id = 1;
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            last_id = int.Parse(sdr["job_id"].ToString());
-
-                             
-                        }
-                    }
-                    generatedJobNo = jobNoPrefix + string.Format("{0}", last_id.ToString().PadLeft(formatLenght, '0'));
-                }
-            }
-            catch (Exception e)
-            {
-                //return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-
-            return generatedJobNo;
-        }
         [HttpPut]
         [Route("job")]
         public IActionResult updateJob(string job_id,string job_remark,string job_status)
@@ -286,8 +251,7 @@ namespace Job_Scheduling.Controllers
         [HttpGet]
         [Route("getpostalcode")]
         public IActionResult getPostalCode(string address)
-        {
-            // get user & Password
+        { 
             try
             {
                 var url = "https://developers.onemap.sg/commonapi/search?searchVal="+ address + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
@@ -372,12 +336,13 @@ namespace Job_Scheduling.Controllers
 
         [HttpGet]
         [Route("getSiteDistance")]
-        public IActionResult getSiteDistance(string address)
+        public IActionResult getSiteDistance(string startPoint, string endPoint, string token, string returnType)
         {
             // get user & Password
             try
             {
-                var url = "https://developers.onemap.sg/commonapi/search?searchVal=" + address + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
+                var url = "https://developers.onemap.sg/privateapi/routingsvc/route";
+                url += "?start="+ startPoint + "&end="+ endPoint +"&routeType=drive&token="+ token;
 
                 var httpRequest = (HttpWebRequest)WebRequest.Create(url);
 
@@ -390,15 +355,14 @@ namespace Job_Scheduling.Controllers
                     var result = streamReader.ReadToEnd();
 
                     var jResult = JsonConvert.DeserializeObject<dynamic>(result);
-                    if (jResult.results.Count > 0)
+                    if (returnType == "distance")
                     {
-                        return new JsonResult(new { postal_code = jResult.results[0]["POSTAL"].ToString() });
+                        return new JsonResult(new { distance = jResult.route_summary.total_distance.ToString() });
                     }
                     else
                     {
-                        return new JsonResult(new { postal_code = "Address not found" });
+                        return new JsonResult(new { time = jResult.route_summary.total_time.ToString() });
                     }
-
                 }
 
 
@@ -411,5 +375,88 @@ namespace Job_Scheduling.Controllers
         }
 
 
+
+
+        private string generateJobNo()
+        {
+            string jobNoPrefix = "JOB-";
+            int formatLenght = 5;
+            string generatedJobNo = string.Empty;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select top 1 * from [job] order by job_id desc", connection);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    int last_id = 1;
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            last_id = int.Parse(sdr["job_id"].ToString());
+
+
+                        }
+                    }
+                    generatedJobNo = jobNoPrefix + string.Format("{0}", last_id.ToString().PadLeft(formatLenght, '0'));
+                }
+            }
+            catch (Exception e)
+            {
+                //return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+            return generatedJobNo;
+        }
+
+        [HttpGet]
+        [Route("getOneMapToken")]
+        public string getOneMapToken()
+        { 
+            try
+            {
+                var url = "https://developers.onemap.sg/privateapi/auth/post/getToken";
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+                var postData = "email=" + Uri.EscapeDataString("fuibuilderspl@gmail.com");
+                postData += "&password=" + Uri.EscapeDataString("z3Kc2buYTZ");
+                var data = Encoding.ASCII.GetBytes(postData);
+
+                httpRequest.Method = "POST";
+                 
+                httpRequest.ContentType = "application/x-www-form-urlencoded";
+                httpRequest.ContentLength = data.Length;
+                using (var stream = httpRequest.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd(); 
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result); 
+                    if (!string.IsNullOrEmpty(jResult.access_token.ToString()))
+                    {
+                        return jResult.access_token;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return "OOPs, something went wrong.\n" + e;
+            }
+        }
     }
 }
