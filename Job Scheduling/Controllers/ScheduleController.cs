@@ -87,7 +87,6 @@ namespace Job_Scheduling.Controllers
         [Route("schedule")]
         public IActionResult insertSchedule(Schedule schedule)
         {
-            schedule.schedule_created_by = HttpContext.Session.GetString("userId");
             schedule.schedule_created_at = DateTime.Now;
             try
             {
@@ -132,8 +131,7 @@ namespace Job_Scheduling.Controllers
             Schedule schedule = new Schedule();
             schedule.schedule_id = int.Parse(schedule_id);
             schedule.schedule_remark = schedule_remark;
-            schedule.schedule_status = schedule_status;
-            schedule.schedule_updated_by = HttpContext.Session.GetString("userId");
+            schedule.schedule_status = schedule_status; 
             schedule.schedule_updated_at = DateTime.Now;
             try
             {

@@ -245,8 +245,7 @@ namespace Job_Scheduling.Controllers
             Job job = new Job();
             job.job_id = int.Parse(job_id);
             job.job_remark = job_remark;
-            job.job_status = job_status;
-            job.job_updated_by = HttpContext.Session.GetString("userId");
+            job.job_status = job_status; 
             job.job_updated_at = DateTime.Now;
             try
             {
