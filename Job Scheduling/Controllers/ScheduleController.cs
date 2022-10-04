@@ -133,6 +133,7 @@ namespace Job_Scheduling.Controllers
             schedule.schedule_remark = schedule_remark;
             schedule.schedule_status = schedule_status; 
             schedule.schedule_updated_at = DateTime.Now;
+
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connStr))
