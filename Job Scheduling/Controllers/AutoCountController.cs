@@ -55,7 +55,7 @@ namespace Job_Scheduling.Controllers
                         {
                             connectionAutoCount.Open();
                             connectionAutoCount.ChangeDatabase(entity_conf.entity_conf_db_name);
-                            SqlCommand cmAutoCount = new SqlCommand("select top 200 * from [QT] where Cancelled ='F' and ToDocKey is null order by dockey desc", connectionAutoCount);
+                            SqlCommand cmAutoCount = new SqlCommand("select top 500 * from [QT] where Cancelled ='F' and ToDocKey is null order by dockey desc", connectionAutoCount);
                             SqlDataReader sdrAutoCount = cmAutoCount.ExecuteReader();
 
                             List<Quotation> quotations = new List<Quotation>();

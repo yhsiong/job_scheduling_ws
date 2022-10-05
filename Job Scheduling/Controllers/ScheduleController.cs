@@ -91,6 +91,43 @@ namespace Job_Scheduling.Controllers
         }
 
         [HttpGet]
+        [Route("schedulejobswithdetails")]
+        public IActionResult getScheduleJobsWithDetails(string schedule_id)
+        {
+            // get user & Password
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] inner join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
+                    " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    List<dynamic> schedulejobs = new List<dynamic>();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejob = parser(sdr);
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    return new JsonResult(schedulejobs);
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
+        [HttpGet]
         [Route("schedule")]
         public IActionResult getSchedule(string schedule_id)
         {
