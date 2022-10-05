@@ -56,16 +56,24 @@ namespace Job_Scheduling.Controllers
 
         [HttpGet]
         [Route("job")]
-        public IActionResult getJob(string job_no)
+        public IActionResult getJob(string job_no, string job_id)
         {
             // get user & Password
             try
             {
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from [job] where job_no=@job_no", connection);
-                    cm.Parameters.AddWithValue("@job_no", job_no);
+                    SqlCommand cm = new SqlCommand();
+                    if (!string.IsNullOrEmpty(job_no))
+                    {
+                        cm = new SqlCommand("select * from [job] where job_no=@job_no", connection);
+                        cm.Parameters.AddWithValue("@job_no", job_no);
+                    }
+                    if (!string.IsNullOrEmpty(job_id))
+                    {
+                        cm = new SqlCommand("select * from [job] where job_id=@job_id", connection);
+                        cm.Parameters.AddWithValue("@job_id", job_id);
+                    }
                     // Opening Connection  
                     connection.Open();
                     // Executing the SQL query  
