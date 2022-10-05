@@ -172,7 +172,7 @@ namespace Job_Scheduling.Controllers
                 {
                     // Creating SqlCommand objcet   
                     SqlCommand cm = new SqlCommand("insert into [schedule] " +
-                        "(schedule_date,schedule_remark,schedule_status,schedule_created_by,schedule_created_at) values " +
+                        "(schedule_date,schedule_remark,schedule_status,schedule_created_by,schedule_created_at) OUTPUT INSERTED.[schedule_id] values " +
                         "(@schedule_date,@schedule_remark,@schedule_status,@schedule_created_by,@schedule_created_at)", connection);
 
                     cm.Parameters.AddWithValue("@schedule_date", schedule.schedule_date);
@@ -185,9 +185,10 @@ namespace Job_Scheduling.Controllers
                     // Opening Connection  
                     connection.Open();
                     // Executing the SQL query  
-                    int result = cm.ExecuteNonQuery();
+                    Int64 result = (Int64)cm.ExecuteScalar();
                     if (result > 0)
                     {
+                        this.generateRoute(result.ToString(),"distance");
                         return new JsonResult(schedule);
                     }
                     else
