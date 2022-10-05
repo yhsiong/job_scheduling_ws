@@ -333,46 +333,6 @@ namespace Job_Scheduling.Controllers
 
         }
 
-        [HttpGet]
-        [Route("getSiteDistance")]
-        public IActionResult getSiteDistance(string startPoint, string endPoint, string token, string returnType)
-        {
-            // get user & Password
-            try
-            {
-                var url = "https://developers.onemap.sg/privateapi/routingsvc/route";
-                url += "?start="+ startPoint + "&end="+ endPoint +"&routeType=drive&token="+ token;
-
-                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-
-                httpRequest.Accept = "application/json";
-
-
-                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    var result = streamReader.ReadToEnd();
-
-                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
-                    if (returnType == "distance")
-                    {
-                        return new JsonResult(new { distance = jResult.route_summary.total_distance.ToString() });
-                    }
-                    else
-                    {
-                        return new JsonResult(new { time = jResult.route_summary.total_time.ToString() });
-                    }
-                }
-
-
-            }
-            catch (Exception e)
-            {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-
-        }
-
 
 
 
@@ -413,49 +373,5 @@ namespace Job_Scheduling.Controllers
             return generatedJobNo;
         }
 
-        [HttpGet]
-        [Route("getOneMapToken")]
-        public string getOneMapToken()
-        { 
-            try
-            {
-                var url = "https://developers.onemap.sg/privateapi/auth/post/getToken";
-
-                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-                var postData = "email=" + Uri.EscapeDataString("fuibuilderspl@gmail.com");
-                postData += "&password=" + Uri.EscapeDataString("z3Kc2buYTZ");
-                var data = Encoding.ASCII.GetBytes(postData);
-
-                httpRequest.Method = "POST";
-                 
-                httpRequest.ContentType = "application/x-www-form-urlencoded";
-                httpRequest.ContentLength = data.Length;
-                using (var stream = httpRequest.GetRequestStream())
-                {
-                    stream.Write(data, 0, data.Length);
-                }
-                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    var result = streamReader.ReadToEnd(); 
-                    var jResult = JsonConvert.DeserializeObject<dynamic>(result); 
-                    if (!string.IsNullOrEmpty(jResult.access_token.ToString()))
-                    {
-                        return jResult.access_token;
-                    }
-                    else
-                    {
-                        return "";
-                    }
-
-                }
-
-
-            }
-            catch (Exception e)
-            {
-                return "OOPs, something went wrong.\n" + e;
-            }
-        }
     }
 }

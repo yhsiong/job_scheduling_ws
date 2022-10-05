@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using Job_Scheduling.Model;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Data.SqlClient;
+using System.Net;
+using System.Text;
 
 namespace Job_Scheduling.Controllers
 {
@@ -49,6 +52,43 @@ namespace Job_Scheduling.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("schedulejobs")]
+        public IActionResult getScheduleJobs(string schedule_id)
+        {
+            // get user & Password
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from [Schedule_job] where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    List<Schedule_Job> schedulejobs = new List<Schedule_Job>();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<Schedule_Job>(typeof(Schedule_Job));
+                            Schedule_Job schedulejob = parser(sdr);
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    return new JsonResult(schedulejobs);
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
         [HttpGet]
         [Route("schedule")]
         public IActionResult getSchedule(string schedule_id)
@@ -169,6 +209,314 @@ namespace Job_Scheduling.Controllers
                 return new JsonResult("OOPs, something went wrong.\n" + e);
             }
         }
+
+        [HttpGet]
+        [Route("generateRoute")]
+        public IActionResult generateRoute(string schedule_id, string generationType)
+        {
+            // get list of active job
+            // get list of car
+            // loop trhough the car
+                // loop the job
+                    // check car distance to job, shortest distance/time win
+            
+            // return car object with task
+
+            try
+            {
+                #region get all active job
+                List<Job> jobs = new List<Job>();
+                List<Vehicle> vehicles = new List<Vehicle>();
+                Dictionary<string, Dictionary<string, string>> carLastPoints= new Dictionary<string, Dictionary<string, string>>();
+                Dictionary<string, List<string>> carJobs = new Dictionary<string, List<string>>();
+                Dictionary<string, int?> vehicleIDs = new Dictionary<string, int?>();
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from [job] where job_status='Active'", connection);
+
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<Job>(typeof(Job));
+                            Job job = parser(sdr);
+                            jobs.Add(job);
+                        }
+                    }
+                }
+                #endregion
+                #region get all active vehicle
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from [vehicle] where vehicle_status='Active'", connection);
+
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<Vehicle>(typeof(Vehicle));
+                            Vehicle vehicle = parser(sdr);
+                            vehicles.Add(vehicle);
+                        }
+                    }
+                }
+                #endregion
+
+                int maxJobTake = (jobs.Count / vehicles.Count) + 1;
+
+                    
+                //729908 office postal code
+                string token = this.getOneMapToken();
+                dynamic coords = this.getLongLat("729908");
+
+                for (int i = 0; i < vehicles.Count; i++)
+                {
+                    Dictionary<string, string> carLastPoint = new Dictionary<string, string>();
+                    if (!carLastPoints.ContainsKey(vehicles[i].vehicle_plat_no))
+                    {
+                        carLastPoint.Add("latitude", coords.Value.latitude);
+                        carLastPoint.Add("longtitude", coords.Value.longtitude);
+                        carLastPoints.Add(vehicles[i].vehicle_plat_no, carLastPoint);
+                        vehicleIDs.Add(vehicles[i].vehicle_plat_no, vehicles[i].vehicle_id);
+                    }
+                }
+                for (int k = 0; k < jobs.Count; k++)
+                {
+                    string jobPostalCode = jobs[k].job_postal_code;
+                    dynamic jobCoords = this.getLongLat(jobPostalCode);
+                    string endPoint = jobCoords.Value.latitude + "," + jobCoords.Value.longtitude;
+                    float shortest = 0;
+                    string winnerPlatNo = ""; 
+
+                    foreach (KeyValuePair<string, Dictionary<string, string>> car in carLastPoints)
+                    {
+                        string carPlat = car.Key;
+                        if (carJobs.ContainsKey(carPlat) && carJobs[carPlat].Count > maxJobTake)
+                        {
+                            continue;
+                        }
+                            string longtitude = car.Value["longtitude"];
+                            string latitude = car.Value["latitude"];
+
+                            string startPoint = car.Value["latitude"] + "," + car.Value["longtitude"];
+                            dynamic calculatedDistance = this.getSiteDistance(startPoint, endPoint, token, generationType);
+                            if (shortest == 0 || (float.Parse(calculatedDistance.Value.distance) < shortest))
+                            {
+                                shortest = float.Parse(calculatedDistance.Value.distance);
+                                winnerPlatNo = carPlat;
+                            }
+                        
+                    }
+
+                    if (carJobs.ContainsKey(winnerPlatNo))
+                    {
+                        List<string> carJob = carJobs[winnerPlatNo];
+                        carJob.Add(jobs[k].job_id.ToString());
+                        
+                    }
+                    else
+                    {
+                        List<string> carJob = new List<string> ();
+                        carJob.Add(jobs[k].job_id.ToString());
+                        carJobs.Add(winnerPlatNo, carJob);
+                    }
+                    Dictionary<string, string> carLastPoint = carLastPoints[winnerPlatNo];
+                    carLastPoint["latitude"] = jobCoords.Value.latitude;
+                    carLastPoint["longtitude"] = jobCoords.Value.longtitude;
+                    carLastPoints[winnerPlatNo] = carLastPoint;
+
+                }
+
+
+                #region loop to insert job
+                if (carJobs.Count > 0)
+                {
+                    DateTime currentDt = DateTime.Now;
+                    foreach(KeyValuePair<string,List<string>> car in carJobs)
+                    {
+                        for (int z = 0; z < car.Value.Count; z++)
+                        {
+                            using (SqlConnection connection = new SqlConnection(_connStr))
+                            {
+                                // Creating SqlCommand objcet   
+                                SqlCommand cm = new SqlCommand("insert into [schedule_job] " +
+                                    "(schedule_job_schedule_id, schedule_job_job_id, schedule_job_order, schedule_job_vehicle_id, schedule_job_created_by, schedule_job_created_at) values " +
+                                    "(@schedule_job_schedule_id, @schedule_job_job_id, @schedule_job_order, @schedule_job_vehicle_id, @schedule_job_created_by, @schedule_job_created_at)", connection);
+                                 
+                                cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                                cm.Parameters.AddWithValue("@schedule_job_job_id", car.Value[z]);
+                                cm.Parameters.AddWithValue("@schedule_job_order", z);
+                                cm.Parameters.AddWithValue("@schedule_job_vehicle_id", vehicleIDs[car.Key]); 
+                                cm.Parameters.AddWithValue("@schedule_job_created_at", currentDt);
+                                cm.Parameters.AddWithValue("@schedule_job_created_by", "");
+
+                                // Opening Connection  
+                                connection.Open();
+                                // Executing the SQL query  
+                                int result = cm.ExecuteNonQuery();
+                                if (result > 0)
+                                {
+                                    
+                                }
+                                else
+                                {
+                                    return new JsonResult("Error inserting");
+                                }
+
+                            }
+                        }
+                    }
+                }
+                return new JsonResult(carJobs);
+
+                #endregion
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
+
+        [HttpGet]
+        [Route("getSiteDistance")]
+        public IActionResult getSiteDistance(string startPoint, string endPoint, string token, string returnType)
+        {
+            // get user & Password
+            try
+            {
+                var url = "https://developers.onemap.sg/privateapi/routingsvc/route";
+                url += "?start=" + startPoint + "&end=" + endPoint + "&routeType=drive&token=" + token;
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+
+                httpRequest.Accept = "application/json";
+
+
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
+                    if (returnType == "distance")
+                    {
+                        return new JsonResult(new { distance = jResult.route_summary.total_distance.ToString() });
+                    }
+                    else
+                    {
+                        return new JsonResult(new { time = jResult.route_summary.total_time.ToString() });
+                    }
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+         
+        private IActionResult getLongLat(string postalCode)
+        {
+            // get user & Password
+            try
+            {
+                var url = "https://developers.onemap.sg/commonapi/search?searchVal=" + postalCode + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+
+                httpRequest.Accept = "application/json";
+
+
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
+                    if (jResult.results.Count > 0)
+                    {
+                        return new JsonResult(new
+                        {
+                            latitude = jResult.results[0]["LATITUDE"].ToString(),
+                            longtitude = jResult.results[0]["LONGTITUDE"].ToString(),
+                        });
+                    }
+
+                    else
+                    {
+                        return new JsonResult(new { postal_code = "Address not found" });
+                    }
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+
+        }
+
+         
+        private string getOneMapToken()
+        {
+            try
+            {
+                var url = "https://developers.onemap.sg/privateapi/auth/post/getToken";
+
+                var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+                var postData = "email=" + Uri.EscapeDataString("fuibuilderspl@gmail.com");
+                postData += "&password=" + Uri.EscapeDataString("z3Kc2buYTZ");
+                var data = Encoding.ASCII.GetBytes(postData);
+
+                httpRequest.Method = "POST";
+
+                httpRequest.ContentType = "application/x-www-form-urlencoded";
+                httpRequest.ContentLength = data.Length;
+                using (var stream = httpRequest.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+                var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+                {
+                    var result = streamReader.ReadToEnd();
+                    var jResult = JsonConvert.DeserializeObject<dynamic>(result);
+                    if (!string.IsNullOrEmpty(jResult.access_token.ToString()))
+                    {
+                        return jResult.access_token;
+                    }
+                    else
+                    {
+                        return "";
+                    }
+
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return "OOPs, something went wrong.\n" + e;
+            }
+        }
+
 
     }
 }
