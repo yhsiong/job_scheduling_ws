@@ -69,23 +69,22 @@ namespace Job_Scheduling.Controllers
                                     quotation = parser(sdrAutoCount);
                                     quotations.Add(quotation);
                                 }
-                            }
-
-                                connectionAutoCount.Close();
-                            return new JsonResult(quotations);
+                            } 
+                                
+                            connectionAutoCount.Close(); 
+                            return StatusCode(200, new JsonResult(quotations)); 
                         }
 
                     }
                     else {
-
-                        return new JsonResult("OOPs, something went wrong.");
+                        return StatusCode(404, string.Format("OOPs, something went wrong."));
                      }
                     
                 }
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong."+ e.Message));
             }
 
         }
@@ -134,21 +133,21 @@ namespace Job_Scheduling.Controllers
                             }
 
                             connectionAutoCount.Close();
-                            return new JsonResult(quotations);
+                            
+                            return StatusCode(200, new JsonResult(quotations));
                         }
 
                     }
                     else
                     {
-
-                        return new JsonResult("OOPs, something went wrong.");
+                        return StatusCode(404, string.Format("OOPs, something went wrong.")); 
                     }
 
                 }
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong." + e.Message));
             }
 
         }

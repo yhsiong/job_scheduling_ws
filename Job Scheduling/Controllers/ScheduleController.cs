@@ -337,7 +337,7 @@ namespace Job_Scheduling.Controllers
                     string endPoint = jobCoords.Value.latitude + "," + jobCoords.Value.longtitude;
                     float shortest = 0;
                     string winnerPlatNo = ""; 
-
+                      
                     foreach (KeyValuePair<string, Dictionary<string, string>> car in carLastPoints)
                     {
                         string carPlat = car.Key;

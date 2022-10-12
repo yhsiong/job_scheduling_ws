@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Job_Scheduling.Database;
 using Job_Scheduling.Model;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
@@ -8,51 +9,47 @@ namespace Job_Scheduling.Controllers
 {
     public class ConfController : Controller
     {
+        private Entity_Conf_Context _Entity_Conf_Context;
         private string _connStr = string.Empty;
         private readonly ILogger<ConfController> _logger;
-        public ConfController(ILogger<ConfController> logger, IConfiguration configuration)
+        public ConfController(Entity_Conf_Context entity_Conf_Context, ILogger<ConfController> logger, IConfiguration configuration)
         {
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
+            _Entity_Conf_Context = entity_Conf_Context;
         }
 
         [HttpGet]
         [Route("getEntityName")]
-        public IActionResult getEntityName()
+        public async Task<IActionResult> getEntityNameAsync()
         {
-            // get user & Password
-            try
+            List<Entity_Conf.Dto.Get> confs = await Entity_Conf.Operations.ReadAll(_Entity_Conf_Context);
+            if (confs == null)
             {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from [entity_conf] where entity_conf_status='Active'", connection); 
-
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<Entity_Conf> confs = new List<Entity_Conf>();
-                    if (sdr.HasRows)
-                    {                         
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<Entity_Conf>(typeof(Entity_Conf));
-                            Entity_Conf conf = parser(sdr);
-                            confs.Add(conf);
-                        }
-                    }
-                    return new JsonResult(confs);
-                }
+                return StatusCode(404, string.Format("Could not find config"));
             }
-            catch (Exception e)
-            {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-             
+            else
+            {  
+                return StatusCode(200, confs);
+            } 
         }
 
-      
+        [HttpGet]
+        [Route("getEntityById")]
+        public async Task<IActionResult> getEntityById(Guid entity_conf_id)
+        {
+            Entity_Conf.Dto.Get conf = await Entity_Conf.Operations.ReadSingle(_Entity_Conf_Context, entity_conf_id);
+            if (conf == null)
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+            else
+            {
+                return StatusCode(200, conf);
+            }
+
+        }
+
 
     }
 }
