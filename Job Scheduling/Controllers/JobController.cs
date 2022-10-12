@@ -33,7 +33,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(jobs));
+                return StatusCode(200, jobs);
             }  
         }
 
@@ -48,7 +48,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(job));
+                return StatusCode(200, job);
             } 
         }
         [HttpGet]
@@ -62,7 +62,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(job));
+                return StatusCode(200, job);
             }
         }
         [HttpPost]
@@ -76,7 +76,7 @@ namespace Job_Scheduling.Controllers
             bool status = await Job.Operations.Create(_Job_Context, job);
             if (status)
             {
-                return StatusCode(200, new JsonResult(job));
+                return StatusCode(200, job);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace Job_Scheduling.Controllers
 
             if (status)
             {
-                return StatusCode(200, new JsonResult(job));
+                return StatusCode(200, job);
             }
             else
             {
@@ -198,7 +198,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(jobTasks));
+                return StatusCode(200, jobTasks);
             }
         }
         [HttpGet]
@@ -212,7 +212,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(jobTask));
+                return StatusCode(200, jobTask);
             }
         }
 
@@ -226,7 +226,7 @@ namespace Job_Scheduling.Controllers
             bool status = await Job_Task.Operations.Create(_Job_Context, jobTask);
             if (status)
             {
-                return StatusCode(200, new JsonResult(jobTask));
+                return StatusCode(200, jobTask);
             }
             else
             {
@@ -242,7 +242,7 @@ namespace Job_Scheduling.Controllers
 
             if (status)
             {
-                return StatusCode(200, new JsonResult(jobTask));
+                return StatusCode(200, jobTask);
             }
             else
             {

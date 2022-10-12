@@ -32,7 +32,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(vehicles));
+                return StatusCode(200, vehicles);
             }              
         }
 
@@ -48,8 +48,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(vehicle));
-
+                return StatusCode(200, vehicle);
             } 
         }
 
@@ -66,8 +65,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(vehicle));
-
+                return StatusCode(200, vehicle);
             }
         }
         [HttpPost]
@@ -79,7 +77,7 @@ namespace Job_Scheduling.Controllers
             bool status = await Vehicle.Operations.Create(_Vehicle_Context, vehicle);
             if (status)
             {
-                return StatusCode(200, new JsonResult(vehicle));
+                return StatusCode(200, vehicle);
             }
             else
             {
@@ -96,7 +94,7 @@ namespace Job_Scheduling.Controllers
 
             if (status)
             {
-                return StatusCode(200, new JsonResult(vehicle));
+                return StatusCode(200, vehicle);
             }
             else
             {

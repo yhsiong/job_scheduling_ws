@@ -72,7 +72,7 @@ namespace Job_Scheduling.Controllers
                             } 
                                 
                             connectionAutoCount.Close(); 
-                            return StatusCode(200, new JsonResult(quotations)); 
+                            return StatusCode(200, quotations); 
                         }
 
                     }
@@ -134,7 +134,7 @@ namespace Job_Scheduling.Controllers
 
                             connectionAutoCount.Close();
                             
-                            return StatusCode(200, new JsonResult(quotations));
+                            return StatusCode(200, quotations);
                         }
 
                     }

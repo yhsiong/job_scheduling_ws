@@ -9,11 +9,10 @@ namespace Job_Scheduling.Model
     {
         [Key]
         public Guid job_id { get; set; }
-        [Required]
         public string job_no { get; set; }
         [Required]
         public string job_quotation_no { get; set; }
-        public string job_remark { get; set; }
+        public string? job_remark { get; set; }
         [Required]
         public string job_status { get; set; }
         [Required]
@@ -22,8 +21,11 @@ namespace Job_Scheduling.Model
         public string job_longtitude { get; set; }
         [Required]
         public string job_latitude { get; set; }
+        [Required]
         public string job_address { get; set; }
+        [Required]
         public string job_customer_name { get; set; }
+        [Required]
         public string job_customer_code { get; set; }
         [Required]
         public DateTime? job_start_date { get; set; }
@@ -120,9 +122,10 @@ namespace Job_Scheduling.Model
             }
             public static async Task<Dto.Get> ReadSingleById(Job_Context job_Context, Guid job_id)
             {
-                Job job = job_Context.Job.Where(x => x.job_id.Equals(job_id)).FirstOrDefault<Job>();
+                List<Job> jobs = job_Context.Job.Where(a => a.job_id.Equals(job_id)).ToList();
+                Job job = new Job();
 
-                if (job == null)
+                if (jobs == null)
                 {
                     return null;
                 }
@@ -186,7 +189,7 @@ namespace Job_Scheduling.Model
                 int formatLenght = 5;
                 int last_id = 1;
                 string generatedJobNo = string.Empty;
-                Job job = job_Context.Job.OrderByDescending(c => c.job_no).FirstOrDefault();
+                Job job = job_Context.Job.Where(x=> !string.IsNullOrEmpty(x.job_no)).FirstOrDefault<Job>();
 
 
                 if (job != null)

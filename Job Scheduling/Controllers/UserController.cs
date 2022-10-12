@@ -39,7 +39,7 @@ namespace Job_Scheduling.Controllers
                     HttpContext.Session.SetString("userId", user.user_id.ToString());
                     HttpContext.Session.SetString("sessionStart", DateTime.Now.ToString());
                 }
-                return StatusCode(200, new JsonResult(user));
+                return StatusCode(200, user);
             }
              
         }
@@ -81,7 +81,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(users));
+                return StatusCode(200, users);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Job_Scheduling.Controllers
             }
             else
             {
-                return StatusCode(200, new JsonResult(user));
+                return StatusCode(200, user);
             }
         }
 
@@ -109,7 +109,7 @@ namespace Job_Scheduling.Controllers
             bool status = await Job_Scheduling.Model.User.Operations.Create(_User_Context, user);
             if (status)
             {
-                return StatusCode(200, new JsonResult(user));
+                return StatusCode(200, user);
             }
             else
             {
@@ -125,7 +125,7 @@ namespace Job_Scheduling.Controllers
 
             if (status)
             {
-                return StatusCode(200, new JsonResult(user));
+                return StatusCode(200, user);
             }
             else
             {
