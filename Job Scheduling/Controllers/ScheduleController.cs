@@ -268,7 +268,7 @@ namespace Job_Scheduling.Controllers
                 List<Vehicle> vehicles = new List<Vehicle>();
                 Dictionary<string, Dictionary<string, string>> carLastPoints= new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, List<string>> carJobs = new Dictionary<string, List<string>>();
-                Dictionary<string, int?> vehicleIDs = new Dictionary<string, int?>();
+                Dictionary<string, Guid> vehicleIDs = new Dictionary<string, Guid>();
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
                     // Creating SqlCommand objcet   
