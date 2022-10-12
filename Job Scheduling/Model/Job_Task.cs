@@ -6,8 +6,9 @@ namespace Job_Scheduling.Model
 {
     public class Job_Task
     {
-        public int? job_task_id { get; set; }
-        public int? job_task_job_id { get; set; }
+        [Key]
+        public Guid job_task_id { get; set; }
+        public Guid job_task_job_id { get; set; }
         public string job_task_description { get; set; }
         public string job_task_status { get; set; }
         public string job_task_created_by { get; set; }

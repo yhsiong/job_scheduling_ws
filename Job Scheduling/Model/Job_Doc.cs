@@ -1,8 +1,11 @@
-﻿namespace Job_Scheduling.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Job_Scheduling.Model
 {
     public class Job_Doc
-    { 
-        public int? job_doc_id { get; set; }
+    {
+        [Key]
+        public Guid job_doc_id { get; set; }
         public int? job_doc_job_id { get; set; }
         public string job_doc_url { get; set; }
         public string job_doc_status { get; set; }

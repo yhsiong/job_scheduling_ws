@@ -6,8 +6,9 @@ namespace Job_Scheduling.Model
 {
     public class Vehicle
     {
-        public int? vehicle_id { get; set; }
-        public int? vehicle_driver_id { get; set; }
+        [Key]
+        public Guid vehicle_id { get; set; }
+        public Guid vehicle_driver_id { get; set; }
         public string vehicle_plat_no { get; set; }
         public string vehicle_model { get; set; }
         public string vehicle_created_by { get; set; }
