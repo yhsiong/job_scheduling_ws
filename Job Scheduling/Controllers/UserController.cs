@@ -104,6 +104,7 @@ namespace Job_Scheduling.Controllers
         [Route("user")]
         public async Task<IActionResult> insertUser(User.Dto.Post user)
         {
+            user.user_id = new Guid();
             user.user_created_at = DateTime.Now;
             bool status = await Job_Scheduling.Model.User.Operations.Create(_User_Context, user);
             if (status)

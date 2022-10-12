@@ -68,7 +68,8 @@ namespace Job_Scheduling.Controllers
         [HttpPost]
         [Route("job")]
         public async Task<IActionResult> insertJob(Job.Dto.Post job)
-        { 
+        {
+            job.job_id = new Guid();
             job.job_no = await Job.Operations.generateJobNo(_Job_Context);
             job.job_created_at = DateTime.Now;
             job.job_status = "Active";
@@ -219,7 +220,7 @@ namespace Job_Scheduling.Controllers
         [Route("jobTask")]
         public async Task<IActionResult> insertjobTask(Job_Task.Dto.Post jobTask)
         {
-
+            jobTask.job_task_id = new Guid();
             jobTask.job_task_created_at = DateTime.Now;
             jobTask.job_task_status = "Active";
             bool status = await Job_Task.Operations.Create(_Job_Context, jobTask);

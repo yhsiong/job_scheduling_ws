@@ -74,7 +74,7 @@ namespace Job_Scheduling.Controllers
         [Route("vehicle")]
         public async Task<IActionResult> insertVehicle(Vehicle.Dto.Post vehicle)
         {
-             
+            vehicle.vehicle_id = new Guid();
             vehicle.vehicle_created_at = DateTime.Now;
             bool status = await Vehicle.Operations.Create(_Vehicle_Context, vehicle);
             if (status)
