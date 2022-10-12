@@ -69,7 +69,7 @@ namespace Job_Scheduling.Controllers
         [Route("job")]
         public async Task<IActionResult> insertJob(Job.Dto.Post job)
         { 
-            job.job_no = generateJobNo();
+            job.job_no = await Job.Operations.generateJobNo(_Job_Context);
             job.job_created_at = DateTime.Now;
             job.job_status = "Active";
             bool status = await Job.Operations.Create(_Job_Context, job);
@@ -190,7 +190,7 @@ namespace Job_Scheduling.Controllers
         [Route("jobTaskByJobId")]
         public async Task<IActionResult> jobTaskByJobId(string job_id)
         {
-            List<Job_Task.Dto.Get> jobTasks = await Job_Task.Operations.ReadSingleByJobId(_Job_Context, job_id);
+            List<Job_Task.Dto.Get> jobTasks = await Job_Task.Operations.ReadSingleByJobId(_Job_Context, Guid.Parse(job_id));
             if (jobTasks == null)
             {
                 return StatusCode(404, string.Format("Could not find config"));
@@ -204,7 +204,7 @@ namespace Job_Scheduling.Controllers
         [Route("jobTaskById")]
         public async Task<IActionResult> jobTaskById(string job_task_id)
         {
-            Job_Task.Dto.Get jobTask = await Job_Task.Operations.ReadSingleById(_Job_Context, job_task_id);
+            Job_Task.Dto.Get jobTask = await Job_Task.Operations.ReadSingleById(_Job_Context, Guid.Parse(job_task_id));
             if (jobTask == null)
             {
                 return StatusCode(404, string.Format("Could not find config"));

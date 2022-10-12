@@ -180,7 +180,7 @@ namespace Job_Scheduling.Model
                     };
                 }
             }
-            private async Task<string> generateJobNo(Job_Context job_Context)
+            public static async Task<string> generateJobNo(Job_Context job_Context)
             {
                 string jobNoPrefix = "JOB-";
                 int formatLenght = 5;

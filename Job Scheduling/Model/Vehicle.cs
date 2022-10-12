@@ -56,7 +56,7 @@ namespace Job_Scheduling.Model
             }
             public static async Task<bool> Update(Vehicle_Context vehicle_Context, Dto.Put vehicleScheme)
             {
-                vehicle_Context.User.Update(vehicleScheme);
+                vehicle_Context.Vehicle.Update(vehicleScheme);
                 try
                 {
                     await vehicle_Context.SaveChangesAsync();
