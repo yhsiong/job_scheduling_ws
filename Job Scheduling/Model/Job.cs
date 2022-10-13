@@ -34,8 +34,8 @@ namespace Job_Scheduling.Model
         [Required]
         public string job_entity_name { get; set; }
         
-        public string job_created_by { get; set; }
-        public string job_updated_by { get; set; }
+        public string? job_created_by { get; set; }
+        public string? job_updated_by { get; set; }
         public DateTime? job_created_at { get; set; }
         public DateTime? job_updated_at { get; set; }
 

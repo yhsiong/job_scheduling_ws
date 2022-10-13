@@ -12,11 +12,10 @@ namespace Job_Scheduling.Model
         public string user_name { get; set; }
         public string user_password { get; set; }
         public string user_status { get; set; }
-        public string user_created_by { get; set; }
-        public string user_updated_by { get; set; }
+        public string? user_created_by { get; set; }
+        public string? user_updated_by { get; set; }
         public DateTime? user_created_at { get; set; }
         public DateTime? user_updated_at { get; set; }
-        public string user_session_id { get; set; }
 
         public Boolean checkSession(HttpContext httpContext)
         {
@@ -29,7 +28,8 @@ namespace Job_Scheduling.Model
         {
             public class Get : User
             {
-
+                [NotMapped]
+                public string user_session_id { get; set; }
             }
             public class Post : User
             {
