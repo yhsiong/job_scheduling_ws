@@ -65,7 +65,10 @@ namespace Job_Scheduling.Model
                 dtoUser.user_status = userScheme.user_status;
                 dtoUser.user_updated_by = userScheme.user_updated_by;
                 dtoUser.user_updated_at = userScheme.user_updated_at;
-                dtoUser.user_username = userScheme.user_username;
+                if (!string.IsNullOrEmpty(userScheme.user_username))
+                {
+                    dtoUser.user_username = userScheme.user_username;
+                }                
                 dtoUser.user_name = userScheme.user_name;
                 dtoUser.user_mobile = userScheme.user_mobile;
                 dtoUser.user_role = userScheme.user_role;
