@@ -44,17 +44,12 @@ namespace Job_Scheduling.Model
         {
             public class Get : Job
             {
-
             }
             public class Post : Job
-            {
-                [Required]
-                public string job_created_by { get; set; }
+            { 
             }
             public class Put : Job
-            {
-                [Required]
-                public string job_updated_by { get; set; }
+            { 
             }
         }
 
@@ -189,7 +184,7 @@ namespace Job_Scheduling.Model
                 int formatLenght = 5;
                 int last_id = 1;
                 string generatedJobNo = string.Empty;
-                Job job = job_Context.Job.Where(x=> !string.IsNullOrEmpty(x.job_no)).FirstOrDefault<Job>();
+                Job job = job_Context.Job.OrderByDescending(x => x.job_created_at).FirstOrDefault<Job>();
 
 
                 if (job != null)

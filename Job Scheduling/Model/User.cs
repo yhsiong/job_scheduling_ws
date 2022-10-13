@@ -33,13 +33,9 @@ namespace Job_Scheduling.Model
             }
             public class Post : User
             {
-                [Required]
-                public string user_created_by { get; set; }
             }
             public class Put : User
             {
-                [Required]
-                public string user_updated_by { get; set; }
             }
         }
 

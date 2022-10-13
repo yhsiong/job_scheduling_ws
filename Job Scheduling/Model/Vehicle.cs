@@ -23,17 +23,12 @@ namespace Job_Scheduling.Model
         {
             public class Get : Vehicle
             {
-
             }
             public class Post : Vehicle
             {
-                [Required]
-                public string vehicle_created_by { get; set; }
             }
             public class Put : Vehicle
             {
-                [Required]
-                public string vehicle_updated_by { get; set; }
             }
         }
 

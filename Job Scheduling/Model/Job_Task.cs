@@ -21,17 +21,12 @@ namespace Job_Scheduling.Model
         {
             public class Get : Job_Task
             {
-
             }
             public class Post : Job_Task
             {
-                [Required]
-                public string job_task_created_by { get; set; }
             }
             public class Put : Job_Task
             {
-                [Required]
-                public string job_task_updated_by { get; set; }
             }
         }
 
