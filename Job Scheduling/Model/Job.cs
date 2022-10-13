@@ -110,7 +110,9 @@ namespace Job_Scheduling.Model
                         job_remark = job.job_remark,
                         job_status=job.job_status,
                         job_updated_at=job.job_updated_at,
-                        job_updated_by = job.job_updated_by
+                        job_updated_by = job.job_updated_by,
+                        job_start_date = job.job_start_date,
+                        job_end_date = job.job_end_date
 
                     }).ToList();
                 }
@@ -143,7 +145,9 @@ namespace Job_Scheduling.Model
                         job_remark = job.job_remark,
                         job_status = job.job_status,
                         job_updated_at = job.job_updated_at,
-                        job_updated_by = job.job_updated_by
+                        job_updated_by = job.job_updated_by,
+                        job_start_date = job.job_start_date,
+                        job_end_date = job.job_end_date
                     }; 
                 }
             }
@@ -174,7 +178,9 @@ namespace Job_Scheduling.Model
                         job_remark = job.job_remark,
                         job_status = job.job_status,
                         job_updated_at = job.job_updated_at,
-                        job_updated_by = job.job_updated_by
+                        job_updated_by = job.job_updated_by,
+                        job_start_date = job.job_start_date,
+                        job_end_date = job.job_end_date
                     };
                 }
             }

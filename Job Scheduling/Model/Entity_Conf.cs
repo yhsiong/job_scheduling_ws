@@ -26,18 +26,13 @@ namespace Job_Scheduling.Model
         public class Dto
         {
             public class Get : Entity_Conf
-            {
-                
+            { 
             }
             public class Post : Entity_Conf
             {
-                [Required]
-                public string entity_conf_created_by { get; set; }
             } 
             public class Put : Entity_Conf
             {
-                [Required]
-                public string entity_conf_updated_by { get; set; }
             }
         }
 
