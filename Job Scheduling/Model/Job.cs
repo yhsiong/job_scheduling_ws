@@ -71,7 +71,13 @@ namespace Job_Scheduling.Model
             }
             public static async Task<bool> Update(Job_Context job_Context, Dto.Put jobScheme)
             {
-                job_Context.Job.Update(jobScheme);
+                Job dtoJob = job_Context.Job.Where(x => x.job_id.Equals(jobScheme.job_id)).FirstOrDefault();
+                dtoJob.job_status = jobScheme.job_status;
+                dtoJob.job_remark = jobScheme.job_remark;
+                dtoJob.job_updated_at = jobScheme.job_updated_at;
+                dtoJob.job_updated_by = jobScheme.job_updated_by;
+
+                job_Context.Job.Update(dtoJob);
                 try
                 {
                     await job_Context.SaveChangesAsync();
@@ -119,10 +125,9 @@ namespace Job_Scheduling.Model
             }
             public static async Task<Dto.Get> ReadSingleById(Job_Context job_Context, Guid job_id)
             {
-                List<Job> jobs = job_Context.Job.Where(a => a.job_id.Equals(job_id)).ToList();
-                Job job = new Job();
+                Job job = job_Context.Job.Where(a => a.job_id.Equals(job_id)).FirstOrDefault();
 
-                if (jobs == null)
+                if (job == null)
                 {
                     return null;
                 }

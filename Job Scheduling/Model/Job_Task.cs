@@ -11,6 +11,7 @@ namespace Job_Scheduling.Model
         public Guid job_task_job_id { get; set; }
         public string job_task_description { get; set; }
         public string job_task_status { get; set; }
+        public string? job_task_remark { get; set; }
         public string? job_task_created_by { get; set; }
         public string? job_task_updated_by { get; set; }
         public DateTime? job_task_created_at { get; set; }
@@ -49,7 +50,13 @@ namespace Job_Scheduling.Model
             }
             public static async Task<bool> Update(Job_Context job_Context, Dto.Put jobTaskScheme)
             {
-                job_Context.Job_Task.Update(jobTaskScheme);
+                Job_Task dtoJobTask = job_Context.Job_Task.Where(x => x.job_task_id.Equals(jobTaskScheme.job_task_id)).FirstOrDefault();
+                dtoJobTask.job_task_status = jobTaskScheme.job_task_status;
+                dtoJobTask.job_task_updated_by = jobTaskScheme.job_task_updated_by;
+                dtoJobTask.job_task_updated_at = jobTaskScheme.job_task_updated_at;
+                dtoJobTask.job_task_remark = jobTaskScheme.job_task_remark;
+                
+                job_Context.Job_Task.Update(dtoJobTask);
                 try
                 {
                     await job_Context.SaveChangesAsync();

@@ -52,7 +52,15 @@ namespace Job_Scheduling.Model
             }
             public static async Task<bool> Update(Vehicle_Context vehicle_Context, Dto.Put vehicleScheme)
             {
-                vehicle_Context.Vehicle.Update(vehicleScheme);
+                Vehicle dtoVehicle = vehicle_Context.Vehicle.Where(x => x.vehicle_id.Equals(vehicleScheme.vehicle_id)).FirstOrDefault();
+                dtoVehicle.vehicle_status = vehicleScheme.vehicle_status;
+                dtoVehicle.vehicle_updated_by = vehicleScheme.vehicle_updated_by;
+                dtoVehicle.vehicle_updated_at = vehicleScheme.vehicle_updated_at;
+                dtoVehicle.vehicle_driver_id = vehicleScheme.vehicle_driver_id;
+                dtoVehicle.vehicle_plat_no = vehicleScheme.vehicle_plat_no;
+                dtoVehicle.vehicle_model = vehicleScheme.vehicle_model;
+
+                vehicle_Context.Vehicle.Update(dtoVehicle);
                 try
                 {
                     await vehicle_Context.SaveChangesAsync();

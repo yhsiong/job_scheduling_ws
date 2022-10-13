@@ -12,6 +12,9 @@ namespace Job_Scheduling.Model
         public string user_name { get; set; }
         public string user_password { get; set; }
         public string user_status { get; set; }
+        public string? user_email { get; set; }
+        public string? user_mobile { get; set; }
+        public string? user_role { get; set; }
         public string? user_created_by { get; set; }
         public string? user_updated_by { get; set; }
         public DateTime? user_created_at { get; set; }
@@ -57,7 +60,18 @@ namespace Job_Scheduling.Model
             }
             public static async Task<bool> Update(User_Context user_Context, Dto.Put userScheme)
             {
-                user_Context.User.Update(userScheme);
+                User dtoUser = user_Context.User.Where(x => x.user_id.Equals(userScheme.user_id)).FirstOrDefault();
+
+                dtoUser.user_status = userScheme.user_status;
+                dtoUser.user_updated_by = userScheme.user_updated_by;
+                dtoUser.user_updated_at = userScheme.user_updated_at;
+                dtoUser.user_username = userScheme.user_username;
+                dtoUser.user_name = userScheme.user_name;
+                dtoUser.user_mobile = userScheme.user_mobile;
+                dtoUser.user_role = userScheme.user_role;
+                dtoUser.user_email = userScheme.user_email;
+                
+                user_Context.User.Update(dtoUser);
                 try
                 {
                     await user_Context.SaveChangesAsync();
