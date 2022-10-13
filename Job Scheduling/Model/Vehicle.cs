@@ -74,7 +74,7 @@ namespace Job_Scheduling.Model
 
             public static async Task<List<Dto.Get>> ReadAll(Vehicle_Context vehicle_Context)
             {
-                List<Vehicle> vehicleLists = vehicle_Context.Vehicle.ToList();
+                List<Vehicle> vehicleLists = vehicle_Context.Vehicle.Where(x => !x.vehicle_status.Equals("Deleted")).ToList();
 
                 if (vehicleLists == null)
                 {

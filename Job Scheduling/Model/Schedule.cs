@@ -68,7 +68,7 @@ namespace Job_Scheduling.Model
 
             public static async Task<List<Dto.Get>> ReadAll(Schedule_Context schedule_Context)
             {
-                List<Schedule> scheduleLists = schedule_Context.Schedule.ToList();
+                List<Schedule> scheduleLists = schedule_Context.Schedule.Where(x => !x.schedule_status.Equals("Deleted")).ToList();
 
                 if (scheduleLists == null)
                 {
