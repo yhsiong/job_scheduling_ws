@@ -105,9 +105,12 @@ namespace Job_Scheduling.Model
                         user_status = user.user_status,
                         user_updated_at = user.user_updated_at,
                         user_updated_by = user.user_updated_by,
-                        user_username = user.user_username
+                        user_username = user.user_username,
+                        user_mobile = user.user_mobile,
+                        user_role = user.user_role,
+                        user_email = user.user_email,
 
-                    }).ToList();
+                }).ToList();
                 }
             }
             public static async Task<Dto.Get> ReadSingleById(User_Context user_Context, Guid user_id)
@@ -129,7 +132,11 @@ namespace Job_Scheduling.Model
                         user_status = user.user_status,
                         user_updated_at = user.user_updated_at,
                         user_updated_by = user.user_updated_by,
-                        user_username = user.user_username
+                        user_username = user.user_username,
+                        user_mobile = user.user_mobile,
+                        user_role = user.user_role,
+                        user_email = user.user_email,
+
                     };
                 }
             }
@@ -152,7 +159,11 @@ namespace Job_Scheduling.Model
                         user_status = user.user_status,
                         user_updated_at = user.user_updated_at,
                         user_updated_by = user.user_updated_by,
-                        user_username = user.user_username
+                        user_username = user.user_username,
+                        user_mobile = user.user_mobile,
+                        user_role = user.user_role,
+                        user_email = user.user_email,
+
                     };
                 }
             }

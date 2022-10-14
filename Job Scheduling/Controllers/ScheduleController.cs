@@ -112,6 +112,7 @@ namespace Job_Scheduling.Controllers
             bool status = await Schedule.Operations.Create(_Schedule_Context, schedule);
             if (status)
             {
+                this.generateRoute(schedule.schedule_id.ToString(),"distance");
                 return StatusCode(200, schedule);
             }
             else
