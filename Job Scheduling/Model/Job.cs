@@ -44,6 +44,7 @@ namespace Job_Scheduling.Model
         {
             public class Get : Job
             {
+                public string job_task_status { get; set; }
             }
             public class Post : Job
             { 
@@ -72,6 +73,8 @@ namespace Job_Scheduling.Model
             public static async Task<bool> Update(Job_Context job_Context, Dto.Put jobScheme)
             {
                 Job dtoJob = job_Context.Job.Where(x => x.job_id.Equals(jobScheme.job_id)).FirstOrDefault();
+                dtoJob.job_start_date = jobScheme.job_start_date;
+                dtoJob.job_end_date = jobScheme.job_end_date;
                 dtoJob.job_status = jobScheme.job_status;
                 dtoJob.job_remark = jobScheme.job_remark;
                 dtoJob.job_updated_at = jobScheme.job_updated_at;
@@ -118,10 +121,22 @@ namespace Job_Scheduling.Model
                         job_updated_at=job.job_updated_at,
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
-                        job_end_date = job.job_end_date
+                        job_end_date = job.job_end_date,
+                        job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
 
                     }).ToList();
                 }
+            }
+            private static string getTaskStatus(Job_Context job_Context, Guid job_id)
+            {
+                Job_Task jobTask = job_Context.Job_Task.Where(x => x.job_task_status.Equals("Active") && x.job_task_job_id.Equals(job_id)).FirstOrDefault();
+                if (jobTask != null && !string.IsNullOrEmpty(jobTask.job_task_description))
+                {
+                    return jobTask.job_task_description;
+                }
+                else {
+                    return "";
+                } 
             }
             public static async Task<Dto.Get> ReadSingleById(Job_Context job_Context, Guid job_id)
             {
@@ -152,7 +167,8 @@ namespace Job_Scheduling.Model
                         job_updated_at = job.job_updated_at,
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
-                        job_end_date = job.job_end_date
+                        job_end_date = job.job_end_date,
+                        job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
                     }; 
                 }
             }
@@ -185,7 +201,8 @@ namespace Job_Scheduling.Model
                         job_updated_at = job.job_updated_at,
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
-                        job_end_date = job.job_end_date
+                        job_end_date = job.job_end_date,
+                        job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
                     };
                 }
             }

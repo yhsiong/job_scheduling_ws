@@ -55,7 +55,8 @@ namespace Job_Scheduling.Model
                 dtoJobTask.job_task_updated_by = jobTaskScheme.job_task_updated_by;
                 dtoJobTask.job_task_updated_at = jobTaskScheme.job_task_updated_at;
                 dtoJobTask.job_task_remark = jobTaskScheme.job_task_remark;
-                
+                dtoJobTask.job_task_description = jobTaskScheme.job_task_description;
+
                 job_Context.Job_Task.Update(dtoJobTask);
                 try
                 {
@@ -87,7 +88,8 @@ namespace Job_Scheduling.Model
                         job_task_job_id = jobTask.job_task_job_id,
                         job_task_status = jobTask.job_task_status,
                         job_task_updated_at = jobTask.job_task_updated_at,
-                        job_task_updated_by = jobTask.job_task_updated_by
+                        job_task_updated_by = jobTask.job_task_updated_by,
+                        job_task_remark = jobTask.job_task_remark
                     }).ToList();
                 }
             }
@@ -110,13 +112,14 @@ namespace Job_Scheduling.Model
                         job_task_job_id = jobTask.job_task_job_id,
                         job_task_status = jobTask.job_task_status,
                         job_task_updated_at = jobTask.job_task_updated_at,
-                        job_task_updated_by = jobTask.job_task_updated_by
+                        job_task_updated_by = jobTask.job_task_updated_by,
+                        job_task_remark = jobTask.job_task_remark
                     };
                 }
             }
             public static async Task<List<Dto.Get>> ReadSingleByJobId(Job_Context job_Context, Guid job_task_job_id)
             {
-                List<Job_Task> jobTasks = job_Context.Job_Task.Where(x => x.job_task_job_id.Equals(job_task_job_id)).ToList();
+                List<Job_Task> jobTasks = job_Context.Job_Task.Where(x => x.job_task_job_id.Equals(job_task_job_id) && !x.job_task_status.Equals("Deleted")).ToList();
 
                 if (jobTasks == null)
                 {
@@ -133,11 +136,35 @@ namespace Job_Scheduling.Model
                         job_task_job_id = jobTask.job_task_job_id,
                         job_task_status = jobTask.job_task_status,
                         job_task_updated_at = jobTask.job_task_updated_at,
-                        job_task_updated_by = jobTask.job_task_updated_by
+                        job_task_updated_by = jobTask.job_task_updated_by,
+                        job_task_remark = jobTask.job_task_remark
                     }).ToList();
                 }
             }
+            public static async Task<List<Dto.Get>> ReadSingleActiveByJobId(Job_Context job_Context, Guid job_task_job_id)
+            {
+                List<Job_Task> jobTasks = job_Context.Job_Task.Where(x => x.job_task_job_id.Equals(job_task_job_id) && x.job_task_status.Equals("Active")).ToList();
 
+                if (jobTasks == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return jobTasks.Select(jobTask => new Dto.Get
+                    {
+                        job_task_created_at = jobTask.job_task_created_at,
+                        job_task_created_by = jobTask.job_task_created_by,
+                        job_task_description = jobTask.job_task_description,
+                        job_task_id = jobTask.job_task_id,
+                        job_task_job_id = jobTask.job_task_job_id,
+                        job_task_status = jobTask.job_task_status,
+                        job_task_updated_at = jobTask.job_task_updated_at,
+                        job_task_updated_by = jobTask.job_task_updated_by,
+                        job_task_remark = jobTask.job_task_remark
+                    }).ToList();
+                }
+            }
         }
     }
 }

@@ -84,6 +84,7 @@ namespace Job_Scheduling.Model
                         schedule_created_by = schedule.schedule_created_by,
                         schedule_updated_by = schedule.schedule_updated_by,
                         schedule_status = schedule.schedule_status,
+                        schedule_date = schedule.schedule_date,
                     }).ToList();
                 }
             }
@@ -105,6 +106,7 @@ namespace Job_Scheduling.Model
                         schedule_created_by = schedule.schedule_created_by,
                         schedule_updated_by = schedule.schedule_updated_by,
                         schedule_status = schedule.schedule_status,
+                        schedule_date = schedule.schedule_date,
                     };
                 }
             } 

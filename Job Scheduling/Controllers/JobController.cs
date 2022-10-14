@@ -185,6 +185,35 @@ namespace Job_Scheduling.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("checkCloseById")]
+        public async Task<IActionResult> checkCloseById(string job_id)
+        {
+            List<Job_Task.Dto.Get> jobTasks = await Job_Task.Operations.ReadSingleActiveByJobId(_Job_Context, Guid.Parse(job_id));
+
+            if (jobTasks == null || jobTasks.Count == 0)
+            {
+                Job job = await Job.Operations.ReadSingleById(_Job_Context, Guid.Parse(job_id));
+                Job.Dto.Put dtoJob = new Job.Dto.Put();
+                
+                dtoJob.job_remark = job.job_remark;
+                dtoJob.job_id = job.job_id;
+                dtoJob.job_status = "Completed";
+                dtoJob.job_updated_by = job.job_updated_by;
+                dtoJob.job_updated_at = DateTime.Now;
+
+                bool status = await Job.Operations.Update(_Job_Context, dtoJob);
+
+                return StatusCode(200, job);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
+
+        
         #endregion
         #region job task
         [HttpGet]

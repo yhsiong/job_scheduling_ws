@@ -137,6 +137,25 @@ namespace Job_Scheduling.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("scheduleJob")]
+        public async Task<IActionResult> updateScheduleJob(string schedule_id, string jsonSchedule)
+        {
+            return StatusCode(404, string.Format("Could not find config"));
+            /*bool status = await Schedule.Operations.Update(_Schedule_Context, scheduleScheme);
+
+            if (status)
+            {
+                return StatusCode(200, scheduleScheme);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }*/
+        }
+
+        
+
         [HttpGet]
         [Route("generateRoute")]
         public IActionResult generateRoute(string schedule_id, string generationType)
@@ -270,8 +289,8 @@ namespace Job_Scheduling.Controllers
                             {
                                 // Creating SqlCommand objcet   
                                 SqlCommand cm = new SqlCommand("insert into [schedule_job] " +
-                                    "(schedule_job_schedule_id, schedule_job_job_id, schedule_job_order, schedule_job_vehicle_id, schedule_job_created_by, schedule_job_created_at) values " +
-                                    "(@schedule_job_schedule_id, @schedule_job_job_id, @schedule_job_order, @schedule_job_vehicle_id, @schedule_job_created_by, @schedule_job_created_at)", connection);
+                                    "(schedule_job_id,schedule_job_schedule_id, schedule_job_job_id, schedule_job_order, schedule_job_vehicle_id, schedule_job_created_by, schedule_job_created_at) values " +
+                                    "(NEWID(),@schedule_job_schedule_id, @schedule_job_job_id, @schedule_job_order, @schedule_job_vehicle_id, @schedule_job_created_by, @schedule_job_created_at)", connection);
                                  
                                 cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
                                 cm.Parameters.AddWithValue("@schedule_job_job_id", car.Value[z]);
