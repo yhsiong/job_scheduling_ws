@@ -17,6 +17,8 @@ builder.Services.AddDbContext<Job_Context>(options => options.UseSqlServer(confi
 builder.Services.AddDbContext<User_Context>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<Vehicle_Context>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<Schedule_Context>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<Material_Context>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<Tool_Context>(options => options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers(); 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
