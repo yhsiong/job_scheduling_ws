@@ -12,5 +12,7 @@ namespace Job_Scheduling.Database
 
         public DbSet<Schedule> Schedule { get; set; }
         public DbSet<Schedule_Job> Schedule_Job { get; set; }
+        public DbSet<Schedule_Job_Material> Schedule_Job_Material { get; set; }
+        public DbSet<Schedule_Job_Tool> Schedule_Job_Tool { get; set; }
     }
 }

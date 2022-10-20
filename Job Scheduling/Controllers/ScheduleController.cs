@@ -20,6 +20,7 @@ namespace Job_Scheduling.Controllers
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
         }
+        #region schedule
         [HttpGet]
         [Route("schedules")]
         public async Task<IActionResult> getSchedules()
@@ -34,60 +35,6 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(200, schedules);
             } 
         }
-
-
-        [HttpGet]
-        [Route("schedulejobs")]
-        public async Task<IActionResult> getScheduleJobs(string schedule_id)
-        {
-            List<Schedule_Job.Dto.Get> scheduleJobs = await Schedule_Job.Operations.ReadSingleByScheduleId(_Schedule_Context, Guid.Parse(schedule_id));
-            if (scheduleJobs == null)
-            {
-                return StatusCode(404, string.Format("Could not find config"));
-            }
-            else
-            {
-                return StatusCode(200, scheduleJobs);
-            }
-        }
-
-        [HttpGet]
-        [Route("schedulejobswithdetails")]
-        public IActionResult getScheduleJobsWithDetails(string schedule_id)
-        {
-            // get user & Password
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] inner join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
-                    " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobs = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejob = parser(sdr);
-                            schedulejobs.Add(schedulejob);
-                        }
-                    }
-                    return new JsonResult(schedulejobs);
-                }
-            }
-            catch (Exception e)
-            {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-
-        }
-
         [HttpGet]
         [Route("schedule")]
         public async Task<IActionResult> getSchedule(string schedule_id)
@@ -136,7 +83,58 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(404, string.Format("Could not find config"));
             }
         }
+        #endregion
+        #region schedule job
+        [HttpGet]
+        [Route("schedulejobs")]
+        public async Task<IActionResult> getScheduleJobs(string schedule_id)
+        {
+            List<Schedule_Job.Dto.Get> scheduleJobs = await Schedule_Job.Operations.ReadSingleByScheduleId(_Schedule_Context, Guid.Parse(schedule_id));
+            if (scheduleJobs == null)
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+            else
+            {
+                return StatusCode(200, scheduleJobs);
+            }
+        }
+        [HttpGet]
+        [Route("schedulejobswithdetails")]
+        public IActionResult getScheduleJobsWithDetails(string schedule_id)
+        {
+            // get user & Password
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] inner join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
+                    " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    List<dynamic> schedulejobs = new List<dynamic>();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejob = parser(sdr);
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    return new JsonResult(schedulejobs);
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
 
+        }
         [HttpPut]
         [Route("scheduleJob")]
         public async Task<IActionResult> updateScheduleJob(string schedule_id, string jsonSchedule)
@@ -153,9 +151,113 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(404, string.Format("Could not find config"));
             }*/
         }
+        #endregion
 
-        
+        #region schedule job material
+        [HttpGet]
+        [Route("schedulejobmaterials")]
+        public async Task<IActionResult> getScheduleJobMaterials(string schedule_job_id)
+        {
+            List<Schedule_Job_Material.Dto.Get> scheduleJobMaterials = await Schedule_Job_Material.Operations.ReadByScheduleJobId(_Schedule_Context, Guid.Parse(schedule_job_id));
+            if (scheduleJobMaterials == null)
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+            else
+            {
+                return StatusCode(200, scheduleJobMaterials);
+            }
+        }
+        [HttpPut]
+        [Route("removeScheduleJobMaterial")]
+        public async Task<IActionResult> removeScheduleJobMaterial(string sjm_id,string sjm_updated_by)
+        {
+            Schedule_Job_Material.Dto.Put scheduleJobMaterial = new Schedule_Job_Material.Dto.Put();
+            scheduleJobMaterial.sjm_status = "Deleted";
+            scheduleJobMaterial.sjm_id = Guid.Parse(sjm_id);
+            scheduleJobMaterial.sjm_updated_at = DateTime.Now;
+            scheduleJobMaterial.sjm_updated_by = sjm_updated_by;
+            
+            bool status = await Schedule_Job_Material.Operations.Update(_Schedule_Context, scheduleJobMaterial);
 
+            if (status)
+            {
+                return StatusCode(200, scheduleJobMaterial);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
+        [HttpPost]
+        [Route("addScheduleJobMaterial")]
+        public async Task<IActionResult> addScheduleJobMaterial(Schedule_Job_Material.Dto.Post scheduleJobMaterial)
+        {  
+            bool status = await Schedule_Job_Material.Operations.Create(_Schedule_Context, scheduleJobMaterial);
+
+            if (status)
+            {
+                return StatusCode(200, scheduleJobMaterial);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
+        #endregion
+        #region schedule job tool
+        [HttpGet]
+        [Route("schedulejobtools")]
+        public async Task<IActionResult> getScheduleJobTools(string schedule_job_id)
+        {
+            List<Schedule_Job_Tool.Dto.Get> scheduleJobTools= await Schedule_Job_Tool.Operations.ReadSingleByScheduleJobId(_Schedule_Context, Guid.Parse(schedule_job_id));
+            if (scheduleJobTools == null)
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+            else
+            {
+                return StatusCode(200, scheduleJobTools);
+            }
+        }
+        [HttpPut]
+        [Route("removeScheduleJobTool")]
+        public async Task<IActionResult> removeScheduleJobTool(string sjt_id, string sjt_updated_by)
+        {
+            Schedule_Job_Tool.Dto.Put scheduleJobTool = new Schedule_Job_Tool.Dto.Put();
+            scheduleJobTool.sjt_status = "Deleted";
+            scheduleJobTool.sjt_id = Guid.Parse(sjt_id);
+            scheduleJobTool.sjt_updated_at = DateTime.Now;
+            scheduleJobTool.sjt_updated_by = sjt_updated_by;
+
+            bool status = await Schedule_Job_Tool.Operations.Update(_Schedule_Context, scheduleJobTool);
+
+            if (status)
+            {
+                return StatusCode(200, scheduleJobTool);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
+        [HttpPost]
+        [Route("addScheduleJobTool")]
+        public async Task<IActionResult> addScheduleJobTool(Schedule_Job_Tool.Dto.Post scheduleJobTool)
+        {
+            bool status = await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleJobTool);
+
+            if (status)
+            {
+                return StatusCode(200, scheduleJobTool);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
+
+        #endregion
         [HttpGet]
         [Route("generateRoute")]
         public IActionResult generateRoute(string schedule_id, string generationType)
