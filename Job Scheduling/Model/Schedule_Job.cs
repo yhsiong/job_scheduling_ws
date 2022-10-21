@@ -10,7 +10,7 @@ namespace Job_Scheduling.Model
         public Guid schedule_job_id { get; set; }
         public Guid schedule_job_schedule_id { get; set; }
         public Guid schedule_job_job_id { get; set; }
-        public Guid schedule_job_order { get; set; }
+        public int? schedule_job_order { get; set; }
         public Guid schedule_job_vehicle_id { get; set; }
         public string? schedule_job_created_by { get; set; }
         public string? schedule_job_updated_by { get; set; }

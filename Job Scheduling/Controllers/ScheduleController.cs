@@ -12,11 +12,13 @@ namespace Job_Scheduling.Controllers
     public class ScheduleController : Controller
     {
         private Schedule_Context _Schedule_Context;
+        private Vehicle_Context _Vehicle_Context;
         private string _connStr = string.Empty;
         private readonly ILogger<ScheduleController> _logger;
-        public ScheduleController(Schedule_Context schedule_Context, ILogger<ScheduleController> logger, IConfiguration configuration)
+        public ScheduleController(Schedule_Context schedule_Context, Vehicle_Context vehicle_Context, ILogger<ScheduleController> logger, IConfiguration configuration)
         {
             _Schedule_Context = schedule_Context;
+            _Vehicle_Context = vehicle_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
         }
@@ -151,6 +153,50 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(404, string.Format("Could not find config"));
             }*/
         }
+        [HttpPut]
+        [Route("scheduleJobs")]
+        public async Task<IActionResult> updateScheduleJobs(string schedule_id, string jsonSchedule)
+        {
+            Dictionary<string, List<dynamic>> schedules = JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(jsonSchedule);
+
+            // set all job id to deleted
+            List<Schedule_Job.Dto.Get> scheduleJobs = await Schedule_Job.Operations.ReadSingleByScheduleId(_Schedule_Context,Guid.Parse(schedule_id));
+            _Schedule_Context.Schedule_Job.RemoveRange(scheduleJobs);
+            _Schedule_Context.SaveChanges();
+
+            Schedule_Job.Dto.Post newScheduleJob = new Schedule_Job.Dto.Post();
+            foreach(KeyValuePair<string,List<dynamic>> schedule in schedules)
+            {
+                newScheduleJob = new Schedule_Job.Dto.Post();
+               
+                Vehicle.Dto.Get vehicle = await Vehicle.Operations.ReadSingleByPlatNo(_Vehicle_Context, schedule.Key);
+                newScheduleJob.schedule_job_vehicle_id = vehicle.vehicle_id;
+                newScheduleJob.schedule_job_schedule_id = Guid.Parse(schedule_id);
+                newScheduleJob.schedule_job_created_at = DateTime.Now;
+                
+                for (int i = 0; i < schedule.Value.Count(); i++)
+                {
+                    newScheduleJob.schedule_job_id = new Guid();
+                    newScheduleJob.schedule_job_job_id = schedule.Value[i].job_id;
+                    newScheduleJob.schedule_job_order = i;
+                    
+                    await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
+
+                }
+            }
+            return StatusCode(200, true); 
+            /*bool status = await Schedule.Operations.Update(_Schedule_Context, scheduleScheme);
+
+            if (status)
+            {
+                return StatusCode(200, scheduleScheme);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }*/
+        }
+
         #endregion
 
         #region schedule job material
