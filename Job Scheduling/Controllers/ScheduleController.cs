@@ -111,7 +111,7 @@ namespace Job_Scheduling.Controllers
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
                     // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] inner join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
+                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] right join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
                     " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
                     cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
                     // Opening Connection  
@@ -160,7 +160,7 @@ namespace Job_Scheduling.Controllers
             Dictionary<string, List<dynamic>> schedules = JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(jsonSchedule);
 
             // set all job id to deleted
-            List<Schedule_Job.Dto.Get> scheduleJobs = await Schedule_Job.Operations.ReadSingleByScheduleId(_Schedule_Context,Guid.Parse(schedule_id));
+            var scheduleJobs = _Schedule_Context.Schedule_Job.Where(x => x.schedule_job_schedule_id.Equals(Guid.Parse(schedule_id))); 
             _Schedule_Context.Schedule_Job.RemoveRange(scheduleJobs);
             _Schedule_Context.SaveChanges();
 
@@ -176,12 +176,14 @@ namespace Job_Scheduling.Controllers
                 
                 for (int i = 0; i < schedule.Value.Count(); i++)
                 {
-                    newScheduleJob.schedule_job_id = new Guid();
-                    newScheduleJob.schedule_job_job_id = schedule.Value[i].job_id;
-                    newScheduleJob.schedule_job_order = i;
-                    
-                    await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
+                    if (schedule.Value[i].job_id != null)
+                    {
+                        newScheduleJob.schedule_job_id = new Guid();
+                        newScheduleJob.schedule_job_job_id = schedule.Value[i].job_id;
+                        newScheduleJob.schedule_job_order = i;
 
+                        await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
+                    }
                 }
             }
             return StatusCode(200, true); 
