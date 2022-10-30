@@ -12,6 +12,7 @@ namespace Job_Scheduling.Model
         public Guid schedule_job_job_id { get; set; }
         public Int64 schedule_job_order { get; set; }
         public Guid schedule_job_vehicle_id { get; set; }
+        public string? schedule_job_remark { get; set; }
         public string? schedule_job_created_by { get; set; }
         public string? schedule_job_updated_by { get; set; }
         public DateTime? schedule_job_created_at { get; set; }
@@ -54,6 +55,7 @@ namespace Job_Scheduling.Model
                 dtoScheduleJob.schedule_job_updated_by = scheduleJobScheme.schedule_job_updated_by;
                 dtoScheduleJob.schedule_job_updated_at = scheduleJobScheme.schedule_job_updated_at;
                 dtoScheduleJob.schedule_job_vehicle_id = scheduleJobScheme.schedule_job_vehicle_id;
+                dtoScheduleJob.schedule_job_remark = scheduleJobScheme.schedule_job_remark;
 
                 schedule_Context.Schedule_Job.Update(dtoScheduleJob);
                 try
@@ -86,8 +88,9 @@ namespace Job_Scheduling.Model
                         schedule_job_schedule_id = scheduleJob.schedule_job_job_id,
                         schedule_job_updated_at = scheduleJob.schedule_job_updated_at,
                         schedule_job_updated_by = scheduleJob.schedule_job_updated_by,
-                        schedule_job_vehicle_id = scheduleJob.schedule_job_vehicle_id
-                    };
+                        schedule_job_vehicle_id = scheduleJob.schedule_job_vehicle_id,
+                        schedule_job_remark = scheduleJob.schedule_job_remark
+                };
                 }
             }
             public static async Task<List<Dto.Get>> ReadSingleByScheduleId(Schedule_Context schedule_Context, Guid schedule_id)
@@ -110,7 +113,8 @@ namespace Job_Scheduling.Model
                         schedule_job_schedule_id = scheduleJob.schedule_job_job_id,
                         schedule_job_updated_at = scheduleJob.schedule_job_updated_at,
                         schedule_job_updated_by = scheduleJob.schedule_job_updated_by,
-                        schedule_job_vehicle_id = scheduleJob.schedule_job_vehicle_id
+                        schedule_job_vehicle_id = scheduleJob.schedule_job_vehicle_id,
+                        schedule_job_remark = scheduleJob.schedule_job_remark
                     }).ToList();
 
                 }
