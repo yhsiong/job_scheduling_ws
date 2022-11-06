@@ -182,6 +182,7 @@ namespace Job_Scheduling.Controllers
                     scheduleMaterial.sjm_schedule_job_id = schedule_job_id;
                     scheduleMaterial.sjm_status = "Active";
                     scheduleMaterial.sjm_created_at = DateTime.Now;
+                    scheduleMaterial.sjm_quantity = materials[i]["material_quantity"];
                     await Schedule_Job_Material.Operations.Create(_Schedule_Context, scheduleMaterial);
                 }
 
@@ -257,7 +258,74 @@ namespace Job_Scheduling.Controllers
                         await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
                         await updateScheduleJob(Json(schedule.Value[i]));
 
+                        // check tools
+
+                        if (schedule.Value[i]["tools"] != null)
+                        {
+                            var tools = schedule.Value[i]["tools"];
+                            // clear all tools
+                            var scheduleJobTools = _Schedule_Context.Schedule_Job_Tool.Where(x => x.sjt_schedule_job_id.Equals(newScheduleJob.schedule_job_job_id));
+                            _Schedule_Context.Schedule_Job_Tool.RemoveRange(scheduleJobTools);
+                            _Schedule_Context.SaveChanges();
+                            Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
+
+                            for (int t = 0; t < tools.Count; t++)
+                            {
+                                scheduleTool = new Schedule_Job_Tool.Dto.Post();
+                                scheduleTool.sjt_id = new Guid();
+                                scheduleTool.sjt_tool_id = tools[t]["tool_id"];
+                                scheduleTool.sjt_schedule_job_id = newScheduleJob.schedule_job_job_id;
+                                scheduleTool.sjt_status = "Active";
+                                scheduleTool.sjt_created_at = DateTime.Now;
+                                await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleTool);
+                            }
+                        }
+
+                        // check materials
+                        if (schedule.Value[i]["materials"] != null)
+                        {
+                            var materials = schedule.Value[i]["materials"]; 
+                            var scheduleJobMaterials = _Schedule_Context.Schedule_Job_Material.Where(x => x.sjm_schedule_job_id.Equals(newScheduleJob.schedule_job_job_id));
+                            _Schedule_Context.Schedule_Job_Material.RemoveRange(scheduleJobMaterials);
+                            _Schedule_Context.SaveChanges();
+                            Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
+                            for (int m = 0; m < materials.Count; m++)
+                            {
+                                scheduleMaterial = new Schedule_Job_Material.Dto.Post();
+                                scheduleMaterial.sjm_id = new Guid();
+                                scheduleMaterial.sjm_material_id = materials[m]["sjm_material_id"];
+                                scheduleMaterial.sjm_schedule_job_id = newScheduleJob.schedule_job_job_id;
+                                scheduleMaterial.sjm_status = "Active";
+                                scheduleMaterial.sjm_created_at = DateTime.Now;
+                                scheduleMaterial.sjm_quantity = materials[m]["sjm_material_quantity"];
+                                await Schedule_Job_Material.Operations.Create(_Schedule_Context, scheduleMaterial);
+                            }
+
+                        }
+                        // check workers
+                        if (schedule.Value[i]["workers"] != null)
+                        { 
+                            var workers = schedule.Value[i]["workers"]; 
+                            var scheduleJobWorkers = _Schedule_Context.Schedule_Job_Worker.Where(x => x.sjw_schedule_job_id.Equals(newScheduleJob.schedule_job_job_id));
+                            _Schedule_Context.Schedule_Job_Worker.RemoveRange(scheduleJobWorkers);
+                            _Schedule_Context.SaveChanges(); 
+                            Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
+                            for (int w = 0; w < workers.Count; w++)
+                            {
+                                scheduleWorker = new Schedule_Job_Worker.Dto.Post();
+                                scheduleWorker.sjw_id = new Guid();
+                                scheduleWorker.sjw_worker_id = workers[i]["user_id"];
+                                scheduleWorker.sjw_schedule_job_id = newScheduleJob.schedule_job_job_id;
+                                scheduleWorker.sjw_status = "Active";
+                                scheduleWorker.sjw_created_at = DateTime.Now;
+                                await Schedule_Job_Worker.Operations.Create(_Schedule_Context, scheduleWorker);
+                            }
+
+                        }
+
+
                     }
+
                 }
             }
             return StatusCode(200, true); 

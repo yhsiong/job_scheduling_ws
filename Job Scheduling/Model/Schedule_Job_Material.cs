@@ -14,7 +14,8 @@ namespace Job_Scheduling.Model
         public DateTime? sjm_created_at { get; set; }
         public string? sjm_updated_by { get; set; }
         public DateTime? sjm_updated_at { get; set; }
-        public string? sjm_status { get; set; } 
+        public string? sjm_status { get; set; }
+        public float sjm_quantity { get; set; }
 
         [NotMapped]
         public class Dto
@@ -57,7 +58,8 @@ namespace Job_Scheduling.Model
                 dtoScheduleJobMaterial.sjm_created_at = scheduleJobMaterialScheme.sjm_created_at;
                 dtoScheduleJobMaterial.sjm_material_id = scheduleJobMaterialScheme.sjm_material_id;
                 dtoScheduleJobMaterial.sjm_schedule_job_id = scheduleJobMaterialScheme.sjm_schedule_job_id;
-
+                dtoScheduleJobMaterial.sjm_quantity = scheduleJobMaterialScheme.sjm_quantity;
+                
                 schedule_Context.Schedule_Job_Material.Update(dtoScheduleJobMaterial);
                 try
                 {
@@ -88,7 +90,9 @@ namespace Job_Scheduling.Model
                         sjm_schedule_job_id = schedule_Job_Material.sjm_schedule_job_id,
                         sjm_updated_at = schedule_Job_Material.sjm_updated_at,
                         sjm_status = schedule_Job_Material.sjm_status,
-                        sjm_updated_by = schedule_Job_Material.sjm_updated_by 
+                        sjm_updated_by = schedule_Job_Material.sjm_updated_by,
+                        sjm_quantity = schedule_Job_Material.sjm_quantity
+
                     };
                 }
             }
@@ -111,7 +115,8 @@ namespace Job_Scheduling.Model
                         sjm_schedule_job_id = scheduleJobMaterial.sjm_schedule_job_id,
                         sjm_updated_at = scheduleJobMaterial.sjm_updated_at,
                         sjm_status = scheduleJobMaterial.sjm_status,
-                        sjm_updated_by = scheduleJobMaterial.sjm_updated_by
+                        sjm_updated_by = scheduleJobMaterial.sjm_updated_by,
+                        sjm_quantity = scheduleJobMaterial.sjm_quantity
                     }).ToList();
                      
                 }
