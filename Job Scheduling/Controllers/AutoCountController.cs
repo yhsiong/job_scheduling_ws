@@ -151,5 +151,68 @@ namespace Job_Scheduling.Controllers
             }
 
         }
+        [HttpGet]
+        [Route("quotationdetails")]
+        public IActionResult getQuotationDetails(string entity_name, string quotation_no)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from [entity_conf] where entity_conf_name=@entity_conf_name", connection);
+                    cm.Parameters.AddWithValue("@entity_conf_name", entity_name);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    Entity_Conf entity_conf = new Entity_Conf();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<Entity_Conf>(typeof(Entity_Conf));
+                            entity_conf = parser(sdr);
+                        }
+                        connection.Close();
+                        using (SqlConnection connectionAutoCount = new SqlConnection(_connAutoCountStr))
+                        {
+                            connectionAutoCount.Open();
+                            connectionAutoCount.ChangeDatabase(entity_conf.entity_conf_db_name);
+                            SqlCommand cmAutoCount = new SqlCommand("select * from [QT] as a inner join [QTDTL] as b on a.DocKey=b.DocKey  where a.DocNo='" + quotation_no + "' order by seq asc", connectionAutoCount);
+                            SqlDataReader sdrAutoCount = cmAutoCount.ExecuteReader();
+
+                            List<Quotation_Detail> quotation_details = new List<Quotation_Detail>();
+
+                            if (sdrAutoCount.HasRows)
+                            {
+                                while (sdrAutoCount.Read())
+                                {
+                                    Quotation_Detail quotation_detail = new Quotation_Detail();
+                                    var parser = sdrAutoCount.GetRowParser<Quotation_Detail>(typeof(Quotation_Detail));
+                                    quotation_detail = parser(sdrAutoCount);
+                                    quotation_details.Add(quotation_detail);
+                                }
+                            }
+
+                            connectionAutoCount.Close();
+
+                            return StatusCode(200, quotation_details);
+                        }
+
+                    }
+                    else
+                    {
+                        return StatusCode(404, string.Format("OOPs, something went wrong."));
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                return StatusCode(404, string.Format("OOPs, something went wrong." + e.Message));
+            }
+
+        }
     }
 }
