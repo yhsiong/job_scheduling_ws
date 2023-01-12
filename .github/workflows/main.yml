@@ -65,7 +65,7 @@ jobs:
       - name: Deploy to IIS
         run: |
           iisreset /stop
-          Copy-Item _build/* C:/workspace/CYC/WS -Recurse -Force
+          Copy-Item _build/* C:\inetpub\wwwroot\cyc\ui -Recurse -Force
           iisreset /start
   
     
