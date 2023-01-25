@@ -109,7 +109,29 @@ namespace Job_Scheduling.Model
                         schedule_date = schedule.schedule_date,
                     };
                 }
-            } 
+            }
+            public static async Task<Dto.Get> ReadSingleByDate(Schedule_Context schedule_Context, DateTime schedule_date)
+            {
+                Schedule schedule = schedule_Context.Schedule.Where(a => a.schedule_date.Equals(schedule_date)).FirstOrDefault();
+
+                if (schedule == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return new Dto.Get
+                    {
+                        schedule_id = schedule.schedule_id,
+                        schedule_updated_at = schedule.schedule_updated_at,
+                        schedule_created_at = schedule.schedule_created_at,
+                        schedule_created_by = schedule.schedule_created_by,
+                        schedule_updated_by = schedule.schedule_updated_by,
+                        schedule_status = schedule.schedule_status,
+                        schedule_date = schedule.schedule_date,
+                    };
+                }
+            }
         }
     }
 }

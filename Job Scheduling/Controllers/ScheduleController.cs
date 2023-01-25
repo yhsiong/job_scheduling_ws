@@ -52,6 +52,40 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(200, schedule);
             } 
         }
+        [HttpGet]
+        [Route("schedulebydate")]
+        public async Task<IActionResult> getScheduleByDate(string schedule_date)
+        {
+            Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, DateTime.Parse(schedule_date));
+            if (schedule == null)
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+            else
+            {
+                return StatusCode(200, schedule);
+            }
+        }
+        [HttpGet]
+        [Route("cronschedule")]
+        public async Task<IActionResult> insertCronSchedule(string schedule_date)
+        {
+            Schedule.Dto.Post schedule = new Schedule.Dto.Post();
+            schedule.schedule_date = schedule_date;
+            schedule.schedule_id = new Guid();
+            schedule.schedule_created_at = DateTime.Now;
+            schedule.schedule_status = "Processing";
+            bool status = await Schedule.Operations.Create(_Schedule_Context, schedule);
+            if (status)
+            {
+                this.generateRoute(schedule.schedule_id.ToString(), "distance");
+                return StatusCode(200, schedule);
+            }
+            else
+            {
+                return StatusCode(404, string.Format("Could not find config"));
+            }
+        }
         [HttpPost]
         [Route("schedule")]
         public async Task<IActionResult> insertSchedule(Schedule.Dto.Post schedule)
