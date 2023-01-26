@@ -17,7 +17,9 @@
         public string ToDocKey { get; set; }
         public string Cancelled { get; set; }
         public string CreatedUserID { get; set; }
-        public string LastModifiedUserID { get; set; } 
+        public string LastModifiedUserID { get; set; }
+        public string BranchCode { get; set; }
+        public string DeliverPhone1 { get; set; } 
         public DateTime? CreatedTimeStamp { get; set; }
         public DateTime? LastModified { get; set; }
     }
