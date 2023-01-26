@@ -37,8 +37,11 @@ namespace Job_Scheduling.Model
         public string? job_created_by { get; set; }
         public string? job_updated_by { get; set; }
         public DateTime? job_created_at { get; set; }
-        public DateTime? job_updated_at { get; set; }
-
+        public DateTime? job_updated_at { get; set; } 
+        public string job_sales_agent { get; set; }
+        public string job_customer_contact_name { get; set; }
+        public string job_customer_contact_no { get; set; }
+         
         [NotMapped]
         public class Dto
         {
@@ -122,6 +125,9 @@ namespace Job_Scheduling.Model
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
                         job_end_date = job.job_end_date,
+                        job_customer_contact_no = job.job_customer_contact_no,
+                        job_customer_contact_name = job.job_customer_contact_name,
+                        job_sales_agent = job.job_sales_agent,
                         job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
 
                     }).ToList();
@@ -168,6 +174,9 @@ namespace Job_Scheduling.Model
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
                         job_end_date = job.job_end_date,
+                        job_customer_contact_no = job.job_customer_contact_no,
+                        job_customer_contact_name = job.job_customer_contact_name,
+                        job_sales_agent = job.job_sales_agent,
                         job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
                     }; 
                 }
@@ -202,6 +211,9 @@ namespace Job_Scheduling.Model
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
                         job_end_date = job.job_end_date,
+                        job_customer_contact_no = job.job_customer_contact_no,
+                        job_customer_contact_name = job.job_customer_contact_name,
+                        job_sales_agent = job.job_sales_agent,
                         job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
                     };
                 }
