@@ -56,7 +56,7 @@ namespace Job_Scheduling.Controllers
         [Route("schedulebydate")]
         public async Task<IActionResult> getScheduleByDate(string schedule_date)
         {
-            Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, DateTime.Parse(schedule_date));
+            Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, schedule_date);
             if (schedule == null)
             {
                 return StatusCode(404, string.Format("Could not find config"));

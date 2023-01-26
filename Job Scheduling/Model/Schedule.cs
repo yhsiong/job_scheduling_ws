@@ -110,7 +110,7 @@ namespace Job_Scheduling.Model
                     };
                 }
             }
-            public static async Task<Dto.Get> ReadSingleByDate(Schedule_Context schedule_Context, DateTime schedule_date)
+            public static async Task<Dto.Get> ReadSingleByDate(Schedule_Context schedule_Context, string schedule_date)
             {
                 Schedule schedule = schedule_Context.Schedule.Where(a => a.schedule_date.Equals(schedule_date)).FirstOrDefault();
 
