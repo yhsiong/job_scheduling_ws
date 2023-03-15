@@ -14,7 +14,8 @@ namespace Job_Scheduling.Model
         public DateTime? sjt_created_at { get; set; }
         public string? sjt_updated_by { get; set; }
         public DateTime? sjt_updated_at { get; set; }
-        public string? sjt_status { get; set; } 
+        public string? sjt_status { get; set; }
+        public float sjt_quantity { get; set; }
 
         [NotMapped]
         public class Dto
@@ -57,7 +58,8 @@ namespace Job_Scheduling.Model
                 dtoScheduleJobTool.sjt_created_at = scheduleJobToolScheme.sjt_created_at;
                 dtoScheduleJobTool.sjt_tool_id = scheduleJobToolScheme.sjt_tool_id;
                 dtoScheduleJobTool.sjt_schedule_job_id = scheduleJobToolScheme.sjt_schedule_job_id;
-
+                dtoScheduleJobTool.sjt_quantity = scheduleJobToolScheme.sjt_quantity;
+                
                 schedule_Context.Schedule_Job_Tool.Update(dtoScheduleJobTool);
                 try
                 {
@@ -88,7 +90,9 @@ namespace Job_Scheduling.Model
                         sjt_schedule_job_id = schedule_Job_Tool.sjt_schedule_job_id,
                         sjt_updated_at = schedule_Job_Tool.sjt_updated_at,
                         sjt_status = schedule_Job_Tool.sjt_status,
-                        sjt_updated_by = schedule_Job_Tool.sjt_updated_by 
+                        sjt_updated_by = schedule_Job_Tool.sjt_updated_by,
+                        sjt_quantity = schedule_Job_Tool.sjt_quantity
+
                     };
                 }
             }
@@ -111,7 +115,8 @@ namespace Job_Scheduling.Model
                         sjt_schedule_job_id = scheduleJobTool.sjt_schedule_job_id,
                         sjt_updated_at = scheduleJobTool.sjt_updated_at,
                         sjt_status = scheduleJobTool.sjt_status,
-                        sjt_updated_by = scheduleJobTool.sjt_updated_by
+                        sjt_updated_by = scheduleJobTool.sjt_updated_by,
+                        sjt_quantity = scheduleJobTool.sjt_quantity
                     }).ToList(); 
                 }
             }

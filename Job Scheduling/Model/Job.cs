@@ -41,7 +41,8 @@ namespace Job_Scheduling.Model
         public string job_sales_agent { get; set; }
         public string job_customer_contact_name { get; set; }
         public string job_customer_contact_no { get; set; }
-         
+        //public string job_primary_staff { get; set; }
+
         [NotMapped]
         public class Dto
         {
@@ -82,6 +83,7 @@ namespace Job_Scheduling.Model
                 dtoJob.job_remark = jobScheme.job_remark;
                 dtoJob.job_updated_at = jobScheme.job_updated_at;
                 dtoJob.job_updated_by = jobScheme.job_updated_by;
+                dtoJob.job_sales_agent = jobScheme.job_sales_agent;
 
                 job_Context.Job.Update(dtoJob);
                 try

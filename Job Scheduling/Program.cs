@@ -86,10 +86,4 @@ var manager = new RecurringJobManager();
 RecurringJob.AddOrUpdate(
     "myrecurringjob",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?schedule_date=" + DateTime.Now.ToString("dd/MM/yyyy")), Cron.Daily);
 
-app.Run();
-
- void test()
-{
-    
-    
-}
+app.Run(); 
