@@ -83,7 +83,7 @@ app.UseEndpoints(endpoints =>
 });
 var manager = new RecurringJobManager(); 
 //manager.AddOrUpdate("some-id", "", Cron.Yearly());
-RecurringJob.AddOrUpdate(
+ /*RecurringJob.AddOrUpdate(
     "myrecurringjob",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?schedule_date=" + DateTime.Now.ToString("dd/MM/yyyy")), Cron.Daily);
-
+ */
 app.Run(); 
