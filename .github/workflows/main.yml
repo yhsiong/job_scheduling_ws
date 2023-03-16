@@ -63,11 +63,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: cyc_ws
-      - name: Deploy to IIS
+      - name: Stop web server
         run: |
-          iisreset /stop
-          Copy-Item _build/* C:\inetpub\wwwroot\cyc\ws -Recurse -Force
-          iisreset /start
-  
+         net stop WAS /y
+      - name: Deploy Renderer 
+        run: |
+         Copy-Item _build/* C:\inetpub\wwwroot\cyc\ws -Recurse -Force
+      - name: Start web server
+        run: |
+         net start W3SVC
     
         
