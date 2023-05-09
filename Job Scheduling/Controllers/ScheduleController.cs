@@ -270,7 +270,7 @@ namespace Job_Scheduling.Controllers
         }
         [HttpPut]
         [Route("scheduleJobs")]
-        public async Task<IActionResult> updateScheduleJobs(string schedule_id, string jsonSchedule)
+        public async Task<IActionResult> updateScheduleJobs([FromBody]string schedule_id, [FromBody]string jsonSchedule)
         {
             Dictionary<string, List<dynamic>> schedules = JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(jsonSchedule);
 
