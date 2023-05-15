@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Hangfire.Common;
 using Job_Scheduling.Database;
 using Job_Scheduling.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -151,6 +152,7 @@ namespace Job_Scheduling.Controllers
             // get user & Password
             try
             {
+                //schedule job
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
                     // Creating SqlCommand objcet   
@@ -171,6 +173,24 @@ namespace Job_Scheduling.Controllers
                             schedulejobs.Add(schedulejob);
                         }
                     }
+                    connection.Close();
+
+                    connection.Open();
+                    //unscheduled job
+                    cm = new SqlCommand("select *, 'Z_Unassigned Job' as vehicle_plat_no from job where job_status='Active' and job_id not in (select schedule_job_job_id from Schedule_job  where schedule_job_schedule_id = @schedule_job_schedule_id)", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    sdr = cm.ExecuteReader();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejob = parser(sdr); 
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    connection.Close();
+
                     return new JsonResult(schedulejobs);
                 }
             }
@@ -270,7 +290,7 @@ namespace Job_Scheduling.Controllers
         }
         [HttpPut]
         [Route("scheduleJobs")]
-        public async Task<IActionResult> updateScheduleJobs(string schedule_id, [FromBody]string jsonSchedule)
+        public async Task<IActionResult> updateScheduleJobs(string schedule_id, string jsonSchedule)
         {
             Dictionary<string, List<dynamic>> schedules = JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(jsonSchedule);
 
@@ -286,105 +306,108 @@ namespace Job_Scheduling.Controllers
             foreach(KeyValuePair<string,List<dynamic>> schedule in schedules)
             {
                 newScheduleJob = new Schedule_Job.Dto.Post();
-               
-                Vehicle.Dto.Get vehicle = await Vehicle.Operations.ReadSingleByPlatNo(_Vehicle_Context, schedule.Key);
-                newScheduleJob.schedule_job_vehicle_id = vehicle.vehicle_id;
-                newScheduleJob.schedule_job_schedule_id = Guid.Parse(schedule_id);
-                newScheduleJob.schedule_job_created_at = DateTime.Now;
-                
-                for (int i = 0; i < schedule.Value.Count(); i++)
+                if (!schedule.Key.Equals("Z_Unassigned Job"))
                 {
-                    if (schedule.Value[i].job_id != null)
+
+                    Vehicle.Dto.Get vehicle = await Vehicle.Operations.ReadSingleByPlatNo(_Vehicle_Context, schedule.Key);
+                    newScheduleJob.schedule_job_vehicle_id = vehicle.vehicle_id;
+                    newScheduleJob.schedule_job_schedule_id = Guid.Parse(schedule_id);
+                    newScheduleJob.schedule_job_created_at = DateTime.Now;
+
+                    for (int i = 0; i < schedule.Value.Count(); i++)
                     {
-                        newScheduleJob.schedule_job_id = new Guid();
-                        newScheduleJob.schedule_job_job_id = schedule.Value[i].job_id;
-                        newScheduleJob.schedule_job_order = i;
-                        newScheduleJob.schedule_job_schedule_id = Guid.Parse(schedule_id);
-                        newScheduleJob.schedule_job_remark = schedule.Value[i].schedule_job_remark ?? "";
-                        await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
-                        dynamic _schedule = schedule.Value[i];
-                        Guid schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
-
-                        if (_schedule["tools"] != null)
+                        if (schedule.Value[i].job_id != null)
                         {
-                            var tools = _schedule["tools"];
-                            if (tools.Count > 0)
+                            newScheduleJob.schedule_job_id = new Guid();
+                            newScheduleJob.schedule_job_job_id = schedule.Value[i].job_id;
+                            newScheduleJob.schedule_job_order = i;
+                            newScheduleJob.schedule_job_schedule_id = Guid.Parse(schedule_id);
+                            newScheduleJob.schedule_job_remark = schedule.Value[i].schedule_job_remark ?? "";
+                            await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
+                            dynamic _schedule = schedule.Value[i];
+                            Guid schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
+
+                            if (_schedule["tools"] != null)
                             {
-                                // clear all tools
-                                var scheduleJobTools = _Schedule_Context.Schedule_Job_Tool.Where(x => x.sjt_schedule_job_id.Equals(schedule_job_id));
-                                _Schedule_Context.Schedule_Job_Tool.RemoveRange(scheduleJobTools);
-                                _Schedule_Context.SaveChanges();
-                                Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
-
-                                for (int i1 = 0; i1 < tools.Count; i1++)
+                                var tools = _schedule["tools"];
+                                if (tools.Count > 0)
                                 {
-                                    scheduleTool = new Schedule_Job_Tool.Dto.Post();
-                                    scheduleTool.sjt_id = new Guid();
-                                    scheduleTool.sjt_tool_id = tools[i1]["tool_id"];
-                                    scheduleTool.sjt_schedule_job_id = schedule_job_id;
-                                    scheduleTool.sjt_status = "Active";
-                                    scheduleTool.sjt_created_at = DateTime.Now;
-                                    await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleTool);
+                                    // clear all tools
+                                    var scheduleJobTools = _Schedule_Context.Schedule_Job_Tool.Where(x => x.sjt_schedule_job_id.Equals(schedule_job_id));
+                                    _Schedule_Context.Schedule_Job_Tool.RemoveRange(scheduleJobTools);
+                                    _Schedule_Context.SaveChanges();
+                                    Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
+
+                                    for (int i1 = 0; i1 < tools.Count; i1++)
+                                    {
+                                        scheduleTool = new Schedule_Job_Tool.Dto.Post();
+                                        scheduleTool.sjt_id = new Guid();
+                                        scheduleTool.sjt_tool_id = tools[i1]["tool_id"];
+                                        scheduleTool.sjt_schedule_job_id = schedule_job_id;
+                                        scheduleTool.sjt_status = "Active";
+                                        scheduleTool.sjt_created_at = DateTime.Now;
+                                        await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleTool);
+                                    }
                                 }
-                            }
-                            
-                        }
 
-                        if (_schedule["materials"] != null)
-                        {
-                            var materials = _schedule["materials"];
-                            if(materials.Count > 0)
-                            { 
-                                // clear all material
-                                var scheduleJobMaterials = _Schedule_Context.Schedule_Job_Material.Where(x => x.sjm_schedule_job_id.Equals(schedule_job_id));
-                                _Schedule_Context.Schedule_Job_Material.RemoveRange(scheduleJobMaterials);
-                                _Schedule_Context.SaveChanges();
-                                Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
-                                for (int i2 = 0; i2 < materials.Count; i2++)
-                                {
-                                    scheduleMaterial = new Schedule_Job_Material.Dto.Post();
-                                    scheduleMaterial.sjm_id = new Guid();
-                                    scheduleMaterial.sjm_material_id = materials[i2]["material_id"];
-                                    scheduleMaterial.sjm_schedule_job_id = schedule_job_id;
-                                    scheduleMaterial.sjm_status = "Active";
-                                    scheduleMaterial.sjm_created_at = DateTime.Now;
-                                    scheduleMaterial.sjm_quantity = materials[i2]["material_quantity"];
-                                    await Schedule_Job_Material.Operations.Create(_Schedule_Context, scheduleMaterial);
-                                }
                             }
-                        }
 
-                        if (_schedule["workers"] != null)
-                        {
-                            var workers = _schedule["workers"];
-                            if(workers.Count > 0)
-                            { 
-                                // clear all worker
-                                var scheduleJobWorkers = _Schedule_Context.Schedule_Job_Worker.Where(x => x.sjw_schedule_job_id.Equals(schedule_job_id));
-                                _Schedule_Context.Schedule_Job_Worker.RemoveRange(scheduleJobWorkers);
-                                _Schedule_Context.SaveChanges();
-                                Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
-                                for (int i3 = 0; i3 < workers.Count; i3++)
+                            if (_schedule["materials"] != null)
+                            {
+                                var materials = _schedule["materials"];
+                                if (materials.Count > 0)
                                 {
-                                    scheduleWorker = new Schedule_Job_Worker.Dto.Post();
-                                    scheduleWorker.sjw_id = new Guid();
-                                    scheduleWorker.sjw_worker_id = workers[i3]["user_id"];
-                                    scheduleWorker.sjw_schedule_job_id = schedule_job_id;
-                                    scheduleWorker.sjw_status = "Active";
-                                    scheduleWorker.sjw_created_at = DateTime.Now;
-                                    await Schedule_Job_Worker.Operations.Create(_Schedule_Context, scheduleWorker);
+                                    // clear all material
+                                    var scheduleJobMaterials = _Schedule_Context.Schedule_Job_Material.Where(x => x.sjm_schedule_job_id.Equals(schedule_job_id));
+                                    _Schedule_Context.Schedule_Job_Material.RemoveRange(scheduleJobMaterials);
+                                    _Schedule_Context.SaveChanges();
+                                    Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
+                                    for (int i2 = 0; i2 < materials.Count; i2++)
+                                    {
+                                        scheduleMaterial = new Schedule_Job_Material.Dto.Post();
+                                        scheduleMaterial.sjm_id = new Guid();
+                                        scheduleMaterial.sjm_material_id = materials[i2]["material_id"];
+                                        scheduleMaterial.sjm_schedule_job_id = schedule_job_id;
+                                        scheduleMaterial.sjm_status = "Active";
+                                        scheduleMaterial.sjm_created_at = DateTime.Now;
+                                        scheduleMaterial.sjm_quantity = materials[i2]["material_quantity"];
+                                        await Schedule_Job_Material.Operations.Create(_Schedule_Context, scheduleMaterial);
+                                    }
                                 }
                             }
 
-                        }
+                            if (_schedule["workers"] != null)
+                            {
+                                var workers = _schedule["workers"];
+                                if (workers.Count > 0)
+                                {
+                                    // clear all worker
+                                    var scheduleJobWorkers = _Schedule_Context.Schedule_Job_Worker.Where(x => x.sjw_schedule_job_id.Equals(schedule_job_id));
+                                    _Schedule_Context.Schedule_Job_Worker.RemoveRange(scheduleJobWorkers);
+                                    _Schedule_Context.SaveChanges();
+                                    Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
+                                    for (int i3 = 0; i3 < workers.Count; i3++)
+                                    {
+                                        scheduleWorker = new Schedule_Job_Worker.Dto.Post();
+                                        scheduleWorker.sjw_id = new Guid();
+                                        scheduleWorker.sjw_worker_id = workers[i3]["user_id"];
+                                        scheduleWorker.sjw_schedule_job_id = schedule_job_id;
+                                        scheduleWorker.sjw_status = "Active";
+                                        scheduleWorker.sjw_created_at = DateTime.Now;
+                                        await Schedule_Job_Worker.Operations.Create(_Schedule_Context, scheduleWorker);
+                                    }
+                                }
 
-                       /* string remarks = _schedule["remarks"].ToString();
-                        Schedule_Job scheduleJob = _Schedule_Context.Schedule_Job.Where(x => x.schedule_job_id.Equals(schedule_job_id)).FirstOrDefault();
-                        scheduleJob.schedule_job_remark = remarks;
-                        await Schedule_Job.Operations.Update(_Schedule_Context, (Schedule_Job.Dto.Put)scheduleJob);*/
+                            }
+
+                            /* string remarks = _schedule["remarks"].ToString();
+                             Schedule_Job scheduleJob = _Schedule_Context.Schedule_Job.Where(x => x.schedule_job_id.Equals(schedule_job_id)).FirstOrDefault();
+                             scheduleJob.schedule_job_remark = remarks;
+                             await Schedule_Job.Operations.Update(_Schedule_Context, (Schedule_Job.Dto.Put)scheduleJob);*/
+
+                        }
 
                     }
-
                 }
             }
             return StatusCode(200, true); 
@@ -589,7 +612,7 @@ namespace Job_Scheduling.Controllers
             try
             {
                 #region get all active job
-                List<Job> jobs = new List<Job>();
+                List<Model.Job> jobs = new List<Model.Job>();
                 List<Vehicle> vehicles = new List<Vehicle>();
                 Dictionary<string, Dictionary<string, string>> carLastPoints= new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, List<string>> carJobs = new Dictionary<string, List<string>>();
@@ -607,8 +630,8 @@ namespace Job_Scheduling.Controllers
                     {
                         while (sdr.Read())
                         {
-                            var parser = sdr.GetRowParser<Job>(typeof(Job));
-                            Job job = parser(sdr);
+                            var parser = sdr.GetRowParser<Model.Job>(typeof(Model.Job));
+                            Model.Job job = parser(sdr);
                             jobs.Add(job);
                         }
                     }
