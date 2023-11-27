@@ -68,7 +68,11 @@ namespace Job_Scheduling.Model
                 if (!string.IsNullOrEmpty(userScheme.user_username))
                 {
                     dtoUser.user_username = userScheme.user_username;
-                }                
+                }
+                if (!string.IsNullOrEmpty(userScheme.user_password))
+                {
+                    dtoUser.user_password = userScheme.user_password;
+                }
                 dtoUser.user_name = userScheme.user_name;
                 dtoUser.user_mobile = userScheme.user_mobile;
                 dtoUser.user_role = userScheme.user_role;

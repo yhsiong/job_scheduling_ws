@@ -325,7 +325,8 @@ namespace Job_Scheduling.Controllers
                             newScheduleJob.schedule_job_remark = schedule.Value[i].schedule_job_remark ?? "";
                             await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
                             dynamic _schedule = schedule.Value[i];
-                            Guid schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
+                            Guid old_schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
+                            Guid new_schedule_job_id = newScheduleJob.schedule_job_id;
 
                             if (_schedule["tools"] != null)
                             {
@@ -333,9 +334,17 @@ namespace Job_Scheduling.Controllers
                                 if (tools.Count > 0)
                                 {
                                     // clear all tools
-                                    var scheduleJobTools = _Schedule_Context.Schedule_Job_Tool.Where(x => x.sjt_schedule_job_id.Equals(schedule_job_id));
-                                    _Schedule_Context.Schedule_Job_Tool.RemoveRange(scheduleJobTools);
-                                    _Schedule_Context.SaveChanges();
+                                    using (SqlConnection connection = new SqlConnection(_connStr))
+                                    {
+                                        // Creating SqlCommand objcet   
+                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Tool where sjt_schedule_job_id=@sjt_schedule_job_id", connection);
+                                        cm.Parameters.AddWithValue("@sjt_schedule_job_id", old_schedule_job_id);
+                                        // Opening Connection  
+                                        connection.Open();
+                                        // Executing the SQL query  
+                                        cm.ExecuteNonQuery();
+                                    } 
+
                                     Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
 
                                     for (int i1 = 0; i1 < tools.Count; i1++)
@@ -343,8 +352,9 @@ namespace Job_Scheduling.Controllers
                                         scheduleTool = new Schedule_Job_Tool.Dto.Post();
                                         scheduleTool.sjt_id = new Guid();
                                         scheduleTool.sjt_tool_id = tools[i1]["tool_id"];
-                                        scheduleTool.sjt_schedule_job_id = schedule_job_id;
+                                        scheduleTool.sjt_schedule_job_id = new_schedule_job_id;
                                         scheduleTool.sjt_status = "Active";
+                                        scheduleTool.sjt_quantity = tools[i1]["tool_quantity"];
                                         scheduleTool.sjt_created_at = DateTime.Now;
                                         await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleTool);
                                     }
@@ -358,16 +368,24 @@ namespace Job_Scheduling.Controllers
                                 if (materials.Count > 0)
                                 {
                                     // clear all material
-                                    var scheduleJobMaterials = _Schedule_Context.Schedule_Job_Material.Where(x => x.sjm_schedule_job_id.Equals(schedule_job_id));
-                                    _Schedule_Context.Schedule_Job_Material.RemoveRange(scheduleJobMaterials);
-                                    _Schedule_Context.SaveChanges();
+                                    using (SqlConnection connection = new SqlConnection(_connStr))
+                                    {
+                                        // Creating SqlCommand objcet   
+                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Material where sjm_schedule_job_id=@sjm_schedule_job_id", connection);
+                                        cm.Parameters.AddWithValue("@sjm_schedule_job_id", old_schedule_job_id);
+                                        // Opening Connection  
+                                        connection.Open();
+                                        // Executing the SQL query  
+                                        cm.ExecuteNonQuery(); 
+                                    }
+                                     
                                     Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
                                     for (int i2 = 0; i2 < materials.Count; i2++)
                                     {
                                         scheduleMaterial = new Schedule_Job_Material.Dto.Post();
                                         scheduleMaterial.sjm_id = new Guid();
                                         scheduleMaterial.sjm_material_id = materials[i2]["material_id"];
-                                        scheduleMaterial.sjm_schedule_job_id = schedule_job_id;
+                                        scheduleMaterial.sjm_schedule_job_id = new_schedule_job_id;
                                         scheduleMaterial.sjm_status = "Active";
                                         scheduleMaterial.sjm_created_at = DateTime.Now;
                                         scheduleMaterial.sjm_quantity = materials[i2]["material_quantity"];
@@ -382,16 +400,24 @@ namespace Job_Scheduling.Controllers
                                 if (workers.Count > 0)
                                 {
                                     // clear all worker
-                                    var scheduleJobWorkers = _Schedule_Context.Schedule_Job_Worker.Where(x => x.sjw_schedule_job_id.Equals(schedule_job_id));
-                                    _Schedule_Context.Schedule_Job_Worker.RemoveRange(scheduleJobWorkers);
-                                    _Schedule_Context.SaveChanges();
+                                    using (SqlConnection connection = new SqlConnection(_connStr))
+                                    {
+                                        // Creating SqlCommand objcet   
+                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Worker where sjw_schedule_job_id=@sjw_schedule_job_id", connection);
+                                        cm.Parameters.AddWithValue("@sjw_schedule_job_id", old_schedule_job_id);
+                                        // Opening Connection  
+                                        connection.Open();
+                                        // Executing the SQL query  
+                                        cm.ExecuteNonQuery();
+                                    } 
+
                                     Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
                                     for (int i3 = 0; i3 < workers.Count; i3++)
                                     {
                                         scheduleWorker = new Schedule_Job_Worker.Dto.Post();
                                         scheduleWorker.sjw_id = new Guid();
                                         scheduleWorker.sjw_worker_id = workers[i3]["user_id"];
-                                        scheduleWorker.sjw_schedule_job_id = schedule_job_id;
+                                        scheduleWorker.sjw_schedule_job_id = new_schedule_job_id;
                                         scheduleWorker.sjw_status = "Active";
                                         scheduleWorker.sjw_created_at = DateTime.Now;
                                         await Schedule_Job_Worker.Operations.Create(_Schedule_Context, scheduleWorker);
@@ -436,7 +462,7 @@ namespace Job_Scheduling.Controllers
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
                     // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from schedule_job_material inner join material on material_id=sjm_material_id where sjm_schedule_job_id=@schedule_job_id", connection);
+                    SqlCommand cm = new SqlCommand("select *,sjm_quantity as material_quantity from schedule_job_material inner join material on material_id=sjm_material_id where sjm_schedule_job_id=@schedule_job_id", connection);
                     cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
                     // Opening Connection  
                     connection.Open();
@@ -507,7 +533,7 @@ namespace Job_Scheduling.Controllers
                 using (SqlConnection connection = new SqlConnection(_connStr))
                 {
                     // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from schedule_job_tool inner join tool on tool_id=sjt_tool_id where sjt_schedule_job_id=@schedule_job_id", connection);
+                    SqlCommand cm = new SqlCommand("select *, sjt_quantity as tool_quantity from schedule_job_tool inner join tool on tool_id=sjt_tool_id where sjt_schedule_job_id=@schedule_job_id", connection);
                     cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
                     // Opening Connection  
                     connection.Open();
@@ -605,6 +631,43 @@ namespace Job_Scheduling.Controllers
             }
         }
         #endregion
+        #region schedule job task
+        [HttpGet]
+        [Route("schedulejobtaskswithdetails")]
+        public async Task<IActionResult> getScheduleJobTaskWithDetails(string schedule_job_id)
+        {
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_connStr))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from job_task inner join schedule_job on job_task_job_id=schedule_job_job_id where job_task_status='Active' and schedule_job_id=@schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    List<dynamic> schedulejobtasks = new List<dynamic>();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejobtask = parser(sdr);
+                            schedulejobtasks.Add(schedulejobtask);
+                        }
+                    }
+                    return new JsonResult(schedulejobtasks);
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult("OOPs, something went wrong.\n" + e);
+            }
+        }
+        #endregion
+
         [HttpGet]
         [Route("generateRoute")]
         public IActionResult generateRoute(string schedule_id, string generationType)
