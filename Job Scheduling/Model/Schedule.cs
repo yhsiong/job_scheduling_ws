@@ -64,8 +64,7 @@ namespace Job_Scheduling.Model
                 {
                     return false;
                 }
-            }
-
+            } 
             public static async Task<List<Dto.Get>> ReadAll(Schedule_Context schedule_Context)
             {
                 List<Schedule> scheduleLists = schedule_Context.Schedule.Where(x => !x.schedule_status.Equals("Deleted")).ToList();
@@ -84,6 +83,7 @@ namespace Job_Scheduling.Model
                         schedule_created_by = schedule.schedule_created_by,
                         schedule_updated_by = schedule.schedule_updated_by,
                         schedule_status = schedule.schedule_status,
+                        schedule_remark = schedule.schedule_remark,
                         schedule_date = schedule.schedule_date,
                     }).ToList();
                 }
@@ -106,6 +106,7 @@ namespace Job_Scheduling.Model
                         schedule_created_by = schedule.schedule_created_by,
                         schedule_updated_by = schedule.schedule_updated_by,
                         schedule_status = schedule.schedule_status,
+                        schedule_remark = schedule.schedule_remark,
                         schedule_date = schedule.schedule_date,
                     };
                 }
@@ -128,6 +129,7 @@ namespace Job_Scheduling.Model
                         schedule_created_by = schedule.schedule_created_by,
                         schedule_updated_by = schedule.schedule_updated_by,
                         schedule_status = schedule.schedule_status,
+                        schedule_remark = schedule.schedule_remark,
                         schedule_date = schedule.schedule_date,
                     };
                 }

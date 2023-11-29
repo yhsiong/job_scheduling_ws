@@ -244,8 +244,8 @@ namespace Job_Scheduling.Controllers
         }
         [HttpPut]
         [Route("scheduleJobs")]
-        public async Task<IActionResult> updateScheduleJobs(string schedule_id, string jsonSchedule)
-        {
+        public async Task<IActionResult> updateScheduleJobs(string schedule_id, string jsonSchedule, string remark)
+        {  
             Dictionary<string, List<dynamic>> schedules = JsonConvert.DeserializeObject<Dictionary<string, List<dynamic>>>(jsonSchedule);
 
             // set all job id to deleted
@@ -289,7 +289,6 @@ namespace Job_Scheduling.Controllers
                                 {
                                     // clear all tools
                                     Schedule_Job_Tool.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
-
                                     Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
 
                                     for (int i1 = 0; i1 < tools.Count; i1++)
@@ -314,7 +313,6 @@ namespace Job_Scheduling.Controllers
                                 {
                                     // clear all material
                                     Schedule_Job_Material.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
-
                                     Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
                                     for (int i2 = 0; i2 < materials.Count; i2++)
                                     {
@@ -337,7 +335,6 @@ namespace Job_Scheduling.Controllers
                                 {
                                     // clear all worker
                                     Schedule_Job_Worker.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
-
                                     Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
                                     for (int i3 = 0; i3 < workers.Count; i3++)
                                     {
@@ -349,18 +346,14 @@ namespace Job_Scheduling.Controllers
                                         scheduleWorker.sjw_created_at = DateTime.Now;
                                         await Schedule_Job_Worker.Operations.Create(_Schedule_Context, scheduleWorker);
                                     }
-                                }
-
-                            }
-
+                                } 
+                            } 
                         }
-
                     }
                 }
             }
             return StatusCode(200, true);
-        }
-
+        } 
         #endregion
 
         #region schedule job material

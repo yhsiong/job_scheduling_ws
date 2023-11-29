@@ -32,7 +32,6 @@ namespace Job_Scheduling.Model
             {
             }
         }
-
         [NotMapped]
         public class Operations
         {

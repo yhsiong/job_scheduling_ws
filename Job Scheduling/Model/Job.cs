@@ -40,8 +40,7 @@ namespace Job_Scheduling.Model
         public DateTime? job_updated_at { get; set; } 
         public string job_sales_agent { get; set; }
         public string job_customer_contact_name { get; set; }
-        public string job_customer_contact_no { get; set; }
-        //public string job_primary_staff { get; set; }
+        public string job_customer_contact_no { get; set; } 
 
         [NotMapped]
         public class Dto

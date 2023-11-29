@@ -122,7 +122,6 @@ namespace Job_Scheduling.Model
 
                 }
             }
-
             public static async Task<List<dynamic>> ReadScheduleJobDetailsCustom(string connString, string schedule_id)
             {
                 List<dynamic> schedulejobs = new List<dynamic>();
