@@ -71,31 +71,39 @@ namespace Job_Scheduling.Controllers
         }
         [HttpGet]
         [Route("cronschedule")]
-        public async Task<IActionResult> insertCronSchedule(string schedule_date)
+        public async Task<IActionResult> insertCronSchedule(string schedulerCode)
         {
-            Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, schedule_date);
-            if (schedule == null)
+            if (schedulerCode == "hangfireScheduler")
             {
-                Schedule.Dto.Post schedule_post = new Schedule.Dto.Post();
-                schedule_post.schedule_date = schedule_date;
-                schedule_post.schedule_id = new Guid();
-                schedule_post.schedule_created_at = DateTime.Now;
-                schedule_post.schedule_status = "Processing";
-                bool status = await Schedule.Operations.Create(_Schedule_Context, schedule_post);
-                if (status)
+                string schedule_date = DateTime.Now.ToString("yyyy-MM-dd");
+                Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, schedule_date);
+                if (schedule == null)
                 {
-                    this.generateRoute(schedule_post.schedule_id.ToString(), "distance");
-                    return StatusCode(200, schedule_post);
+                    Schedule.Dto.Post schedule_post = new Schedule.Dto.Post();
+                    schedule_post.schedule_date = schedule_date;
+                    schedule_post.schedule_id = new Guid();
+                    schedule_post.schedule_created_at = DateTime.Now;
+                    schedule_post.schedule_status = "Processing";
+                    bool status = await Schedule.Operations.Create(_Schedule_Context, schedule_post);
+                    if (status)
+                    {
+                        this.generateRoute(schedule_post.schedule_id.ToString(), "distance");
+                        return StatusCode(200, schedule_post);
+                    }
+                    else
+                    {
+                        return StatusCode(404, string.Format("Could not find config"));
+                    }
                 }
                 else
                 {
-                    return StatusCode(404, string.Format("Could not find config"));
+                    return StatusCode(200, schedule);
                 }
             }
             else
             {
-                return StatusCode(200, schedule);
-            } 
+                return StatusCode(404, "Error!");
+            }
         }
         [HttpPost]
         [Route("schedule")]

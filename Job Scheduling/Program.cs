@@ -63,11 +63,13 @@ builder.Services.AddHangfireServer();
 var app = builder.Build();
 app.UseSession();
 // Configure the HTTP request pipeline.
-/*if (app.Environment.IsDevelopment())
-{*/
+int test = app.Urls.Count();
+
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
+}
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -84,6 +86,6 @@ app.UseEndpoints(endpoints =>
 var manager = new RecurringJobManager(); 
 //manager.AddOrUpdate("some-id", "", Cron.Yearly());
  RecurringJob.AddOrUpdate(
-    "myrecurringjob",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?schedule_date=" + DateTime.Now.ToString("yyyy-MM-dd")), Cron.Daily(18,0));
+    "myrecurringjob",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?schedulerCode=hangfireScheduler"), Cron.Daily(18,0), TimeZoneInfo.Local);
  
 app.Run(); 
