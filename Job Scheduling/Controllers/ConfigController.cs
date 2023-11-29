@@ -47,9 +47,6 @@ namespace Job_Scheduling.Controllers
             {
                 return StatusCode(200, conf);
             }
-
         }
-
-
     }
 }

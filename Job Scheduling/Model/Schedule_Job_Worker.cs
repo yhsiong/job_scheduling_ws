@@ -1,6 +1,8 @@
-﻿using Job_Scheduling.Database;
+﻿using Dapper;
+using Job_Scheduling.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 using Z.EntityFramework.Plus;
 
 namespace Job_Scheduling.Model
@@ -93,6 +95,46 @@ namespace Job_Scheduling.Model
                     }).ToList();
                      
                 }
+            }
+            public static async void removeLines(string connString, string schedule_job_id)
+            {
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("delete from Schedule_Job_Worker where sjw_schedule_job_id=@sjw_schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@sjw_schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    cm.ExecuteNonQuery();
+                    connection.Close();
+                }
+            }
+            public static async Task<List<dynamic>> ReadScheduleJobWorkersCustom(string connString, string schedule_job_id)
+            {
+                List<dynamic> schedulejobworkers = new List<dynamic>();
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from schedule_job_worker inner join [user] on [user].user_id=sjw_worker_id where sjw_schedule_job_id=@schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejobworker = parser(sdr);
+                            schedulejobworkers.Add(schedulejobworker);
+                        }
+                    }
+                }
+                return schedulejobworkers;
             }
         }
     }

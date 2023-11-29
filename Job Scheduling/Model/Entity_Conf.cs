@@ -117,6 +117,32 @@ namespace Job_Scheduling.Model
                 }
             }
 
+            public static async Task<Dto.Get> ReadSingleByName(Entity_Conf_Context entity_Conf_Context, string entity_conf_name)
+            {
+                Entity_Conf conf = entity_Conf_Context.Entity_Conf.Where(x => x.entity_conf_name.Equals(entity_conf_name)).FirstOrDefault<Entity_Conf>();
+
+                if (conf == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return new Dto.Get
+                    {
+                        entity_conf_created_at = conf.entity_conf_created_at,
+                        entity_conf_created_by = conf.entity_conf_created_by,
+                        entity_conf_db_name = conf.entity_conf_db_name,
+                        entity_conf_id = conf.entity_conf_id,
+                        entity_conf_name = conf.entity_conf_name,
+                        entity_conf_status = conf.entity_conf_status,
+                        entity_conf_updated_at = conf.entity_conf_updated_at,
+                        entity_conf_updated_by = conf.entity_conf_updated_by
+                    };
+
+
+                }
+            }
+
         }
     }
 }

@@ -13,12 +13,14 @@ namespace Job_Scheduling.Controllers
 {
     public class ScheduleController : Controller
     {
+        private Job_Context _Job_Context;
         private Schedule_Context _Schedule_Context;
         private Vehicle_Context _Vehicle_Context;
         private string _connStr = string.Empty;
         private readonly ILogger<ScheduleController> _logger;
-        public ScheduleController(Schedule_Context schedule_Context, Vehicle_Context vehicle_Context, ILogger<ScheduleController> logger, IConfiguration configuration)
+        public ScheduleController(Job_Context job_Context, Schedule_Context schedule_Context, Vehicle_Context vehicle_Context, ILogger<ScheduleController> logger, IConfiguration configuration)
         {
+            _Job_Context = job_Context;
             _Schedule_Context = schedule_Context;
             _Vehicle_Context = vehicle_Context;
             _logger = logger;
@@ -147,56 +149,18 @@ namespace Job_Scheduling.Controllers
         }
         [HttpGet]
         [Route("schedulejobswithdetails")]
-        public IActionResult getScheduleJobsWithDetails(string schedule_id)
+        public async Task<IActionResult> getScheduleJobsWithDetails(string schedule_id)
         {
             // get user & Password
             try
             {
                 //schedule job
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] right join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
-                    " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobs = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejob = parser(sdr);
-                            schedulejobs.Add(schedulejob);
-                        }
-                    }
-                    connection.Close();
-
-                    connection.Open();
-                    //unscheduled job
-                    cm = new SqlCommand("select *, 'Z_Unassigned Job' as vehicle_plat_no from job where job_status='Active' and job_id not in (select schedule_job_job_id from Schedule_job  where schedule_job_schedule_id = @schedule_job_schedule_id)", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
-                    sdr = cm.ExecuteReader();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejob = parser(sdr); 
-                            schedulejobs.Add(schedulejob);
-                        }
-                    }
-                    connection.Close();
-
-                    return new JsonResult(schedulejobs);
-                }
+                List<dynamic> schedulejobs = await Schedule_Job.Operations.ReadScheduleJobDetailsCustom(_connStr, schedule_id);
+                return StatusCode(200, schedulejobs);
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
             }
 
         }
@@ -276,17 +240,7 @@ namespace Job_Scheduling.Controllers
             scheduleJob.schedule_job_remark = remarks;
             await Schedule_Job.Operations.Update(_Schedule_Context, (Schedule_Job.Dto.Put)scheduleJob);
              
-            return StatusCode(200, true);
-            /*bool status = await Schedule.Operations.Update(_Schedule_Context, scheduleScheme);
-
-            if (status)
-            {
-                return StatusCode(200, scheduleScheme);
-            }
-            else
-            {
-                return StatusCode(404, string.Format("Could not find config"));
-            }*/
+            return StatusCode(200, true); 
         }
         [HttpPut]
         [Route("scheduleJobs")]
@@ -303,7 +257,7 @@ namespace Job_Scheduling.Controllers
             }
 
             Schedule_Job.Dto.Post newScheduleJob = new Schedule_Job.Dto.Post();
-            foreach(KeyValuePair<string,List<dynamic>> schedule in schedules)
+            foreach (KeyValuePair<string, List<dynamic>> schedule in schedules)
             {
                 newScheduleJob = new Schedule_Job.Dto.Post();
                 if (!schedule.Key.Equals("Z_Unassigned Job"))
@@ -334,16 +288,7 @@ namespace Job_Scheduling.Controllers
                                 if (tools.Count > 0)
                                 {
                                     // clear all tools
-                                    using (SqlConnection connection = new SqlConnection(_connStr))
-                                    {
-                                        // Creating SqlCommand objcet   
-                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Tool where sjt_schedule_job_id=@sjt_schedule_job_id", connection);
-                                        cm.Parameters.AddWithValue("@sjt_schedule_job_id", old_schedule_job_id);
-                                        // Opening Connection  
-                                        connection.Open();
-                                        // Executing the SQL query  
-                                        cm.ExecuteNonQuery();
-                                    } 
+                                    Schedule_Job_Tool.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
 
                                     Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
 
@@ -368,17 +313,8 @@ namespace Job_Scheduling.Controllers
                                 if (materials.Count > 0)
                                 {
                                     // clear all material
-                                    using (SqlConnection connection = new SqlConnection(_connStr))
-                                    {
-                                        // Creating SqlCommand objcet   
-                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Material where sjm_schedule_job_id=@sjm_schedule_job_id", connection);
-                                        cm.Parameters.AddWithValue("@sjm_schedule_job_id", old_schedule_job_id);
-                                        // Opening Connection  
-                                        connection.Open();
-                                        // Executing the SQL query  
-                                        cm.ExecuteNonQuery(); 
-                                    }
-                                     
+                                    Schedule_Job_Material.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
+
                                     Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
                                     for (int i2 = 0; i2 < materials.Count; i2++)
                                     {
@@ -400,16 +336,7 @@ namespace Job_Scheduling.Controllers
                                 if (workers.Count > 0)
                                 {
                                     // clear all worker
-                                    using (SqlConnection connection = new SqlConnection(_connStr))
-                                    {
-                                        // Creating SqlCommand objcet   
-                                        SqlCommand cm = new SqlCommand("delete from Schedule_Job_Worker where sjw_schedule_job_id=@sjw_schedule_job_id", connection);
-                                        cm.Parameters.AddWithValue("@sjw_schedule_job_id", old_schedule_job_id);
-                                        // Opening Connection  
-                                        connection.Open();
-                                        // Executing the SQL query  
-                                        cm.ExecuteNonQuery();
-                                    } 
+                                    Schedule_Job_Worker.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
 
                                     Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
                                     for (int i3 = 0; i3 < workers.Count; i3++)
@@ -426,27 +353,12 @@ namespace Job_Scheduling.Controllers
 
                             }
 
-                            /* string remarks = _schedule["remarks"].ToString();
-                             Schedule_Job scheduleJob = _Schedule_Context.Schedule_Job.Where(x => x.schedule_job_id.Equals(schedule_job_id)).FirstOrDefault();
-                             scheduleJob.schedule_job_remark = remarks;
-                             await Schedule_Job.Operations.Update(_Schedule_Context, (Schedule_Job.Dto.Put)scheduleJob);*/
-
                         }
 
                     }
                 }
             }
-            return StatusCode(200, true); 
-            /*bool status = await Schedule.Operations.Update(_Schedule_Context, scheduleScheme);
-
-            if (status)
-            {
-                return StatusCode(200, scheduleScheme);
-            }
-            else
-            {
-                return StatusCode(404, string.Format("Could not find config"));
-            }*/
+            return StatusCode(200, true);
         }
 
         #endregion
@@ -455,35 +367,15 @@ namespace Job_Scheduling.Controllers
         [HttpGet]
         [Route("schedulejobmaterialswithdetails")]
         public async Task<IActionResult> getScheduleJobMaterialsWithDetails(string schedule_job_id)
-        {
-
+        { 
             try
             {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select *,sjm_quantity as material_quantity from schedule_job_material inner join material on material_id=sjm_material_id where sjm_schedule_job_id=@schedule_job_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobmaterials = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejobmaterial = parser(sdr);
-                            schedulejobmaterials.Add(schedulejobmaterial);
-                        }
-                    }
-                    return new JsonResult(schedulejobmaterials);
-                }
+                List<dynamic> schedulejobmaterials = await Schedule_Job_Material.Operations.ReadScheduleJobMaterialsCustom(_connStr, schedule_job_id);
+                return StatusCode(200, schedulejobmaterials);
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
             }
         }
         [HttpPut]
@@ -530,31 +422,12 @@ namespace Job_Scheduling.Controllers
         {
             try
             {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select *, sjt_quantity as tool_quantity from schedule_job_tool inner join tool on tool_id=sjt_tool_id where sjt_schedule_job_id=@schedule_job_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobtools = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejobtool = parser(sdr);
-                            schedulejobtools.Add(schedulejobtool);
-                        }
-                    }
-                    return new JsonResult(schedulejobtools);
-                }
+                List<dynamic> schedulejobtools = await Schedule_Job_Tool.Operations.ReadScheduleJobToolsCustom(_connStr, schedule_job_id);
+                return StatusCode(200, schedulejobtools);
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
             } 
         }
         [HttpPut]
@@ -599,36 +472,16 @@ namespace Job_Scheduling.Controllers
         [HttpGet]
         [Route("schedulejobworkerswithdetails")]
         public async Task<IActionResult> getScheduleJobWorkersWithDetails(string schedule_job_id)
-        {
-
+        { 
             try
             {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from schedule_job_worker inner join [user] on [user].user_id=sjw_worker_id where sjw_schedule_job_id=@schedule_job_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobworkers = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejobworker = parser(sdr);
-                            schedulejobworkers.Add(schedulejobworker);
-                        }
-                    }
-                    return new JsonResult(schedulejobworkers);
-                }
+                List<dynamic> schedulejobworkers = await Schedule_Job_Worker.Operations.ReadScheduleJobWorkersCustom(_connStr, schedule_job_id);
+                return StatusCode(200, schedulejobworkers);
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
+            } 
         }
         #endregion
         #region schedule job task
@@ -636,91 +489,36 @@ namespace Job_Scheduling.Controllers
         [Route("schedulejobtaskswithdetails")]
         public async Task<IActionResult> getScheduleJobTaskWithDetails(string schedule_job_id)
         {
-
             try
             {
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from job_task inner join schedule_job on job_task_job_id=schedule_job_job_id where job_task_status='Active' and schedule_job_id=@schedule_job_id", connection);
-                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    List<dynamic> schedulejobtasks = new List<dynamic>();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<dynamic>();
-                            dynamic schedulejobtask = parser(sdr);
-                            schedulejobtasks.Add(schedulejobtask);
-                        }
-                    }
-                    return new JsonResult(schedulejobtasks);
-                }
+                List<dynamic> schedulejobtasks = await Schedule_Job.Operations.ReadScheduleJobTasksCustom(_connStr, schedule_job_id);
+                return StatusCode(200, schedulejobtasks);
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
+            } 
         }
         #endregion
 
         [HttpGet]
         [Route("generateRoute")]
-        public IActionResult generateRoute(string schedule_id, string generationType)
+        public async Task<IActionResult> generateRoute(string schedule_id, string generationType)
         { 
             try
             {
-                #region get all active job
-                List<Model.Job> jobs = new List<Model.Job>();
-                List<Vehicle> vehicles = new List<Vehicle>();
-                Dictionary<string, Dictionary<string, string>> carLastPoints= new Dictionary<string, Dictionary<string, string>>();
+
+                List<Model.Job.Dto.Get> jobs = new List<Model.Job.Dto.Get>();
+                List<Vehicle.Dto.Get> vehicles = new List<Vehicle.Dto.Get>();
+                Dictionary<string, Dictionary<string, string>> carLastPoints = new Dictionary<string, Dictionary<string, string>>();
                 Dictionary<string, List<string>> carJobs = new Dictionary<string, List<string>>();
                 Dictionary<string, Guid> vehicleIDs = new Dictionary<string, Guid>();
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from [job] where job_status='Active'", connection);
 
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<Model.Job>(typeof(Model.Job));
-                            Model.Job job = parser(sdr);
-                            jobs.Add(job);
-                        }
-                    }
-                }
+                #region get all active job
+                jobs = await Model.Job.Operations.ReadAllActive(_Job_Context);
                 #endregion
                 #region get all active vehicle
-                using (SqlConnection connection = new SqlConnection(_connStr))
-                {
-                    // Creating SqlCommand objcet   
-                    SqlCommand cm = new SqlCommand("select * from [vehicle] where vehicle_status='Active'", connection);
-
-                    // Opening Connection  
-                    connection.Open();
-                    // Executing the SQL query  
-                    SqlDataReader sdr = cm.ExecuteReader();
-                    
-                    if (sdr.HasRows)
-                    {
-                        while (sdr.Read())
-                        {
-                            var parser = sdr.GetRowParser<Vehicle>(typeof(Vehicle));
-                            Vehicle vehicle = parser(sdr);
-                            vehicles.Add(vehicle);
-                        }
-                    }
-                }
+                vehicles = await Vehicle.Operations.ReadAllActive(_Vehicle_Context); 
                 #endregion
 
                 int maxJobTake = (jobs.Count / vehicles.Count) + 1;
@@ -799,31 +597,15 @@ namespace Job_Scheduling.Controllers
                         {
                             using (SqlConnection connection = new SqlConnection(_connStr))
                             {
-                                // Creating SqlCommand objcet   
-                                SqlCommand cm = new SqlCommand("insert into [schedule_job] " +
-                                    "(schedule_job_id,schedule_job_schedule_id, schedule_job_job_id, schedule_job_order, schedule_job_vehicle_id, schedule_job_created_by, schedule_job_created_at) values " +
-                                    "(NEWID(),@schedule_job_schedule_id, @schedule_job_job_id, @schedule_job_order, @schedule_job_vehicle_id, @schedule_job_created_by, @schedule_job_created_at)", connection);
-                                 
-                                cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
-                                cm.Parameters.AddWithValue("@schedule_job_job_id", car.Value[z]);
-                                cm.Parameters.AddWithValue("@schedule_job_order", z);
-                                cm.Parameters.AddWithValue("@schedule_job_vehicle_id", vehicleIDs[car.Key]); 
-                                cm.Parameters.AddWithValue("@schedule_job_created_at", currentDt);
-                                cm.Parameters.AddWithValue("@schedule_job_created_by", "");
+                                Schedule_Job.Dto.Post schedule_job = new Schedule_Job.Dto.Post();
+                                schedule_job.schedule_job_schedule_id = Guid.Parse(schedule_id);
+                                schedule_job.schedule_job_job_id = Guid.Parse(car.Value[z]);
+                                schedule_job.schedule_job_order = z;
+                                schedule_job.schedule_job_vehicle_id = vehicleIDs[car.Key];
+                                schedule_job.schedule_job_created_at = currentDt;
+                                schedule_job.schedule_job_created_by = "";
 
-                                // Opening Connection  
-                                connection.Open();
-                                // Executing the SQL query  
-                                int result = cm.ExecuteNonQuery();
-                                if (result > 0)
-                                {
-                                    
-                                }
-                                else
-                                {
-                                    return new JsonResult("Error inserting");
-                                }
-
+                                await Schedule_Job.Operations.Create(_Schedule_Context, schedule_job);
                             }
                         }
                     }
@@ -841,7 +623,7 @@ namespace Job_Scheduling.Controllers
             }
             catch (Exception e)
             {
-                return new JsonResult("OOPs, something went wrong.\n" + e);
+                return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
             }
 
         }
@@ -918,18 +700,13 @@ namespace Job_Scheduling.Controllers
                     {
                         return new JsonResult(new { postal_code = "Address not found" });
                     }
-
                 }
-
-
             }
             catch (Exception e)
             {
                 return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-
+            } 
         }
-
          
         private string getOneMapToken()
         {
@@ -962,11 +739,8 @@ namespace Job_Scheduling.Controllers
                     else
                     {
                         return "";
-                    }
-
-                }
-
-
+                    } 
+                } 
             }
             catch (Exception e)
             {

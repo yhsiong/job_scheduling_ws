@@ -96,6 +96,30 @@ namespace Job_Scheduling.Model
                     }).ToList();
                 }
             }
+            public static async Task<List<Dto.Get>> ReadAllActive(Vehicle_Context vehicle_Context)
+            {
+                List<Vehicle> vehicleLists = vehicle_Context.Vehicle.Where(x => x.vehicle_status.Equals("Active")).ToList();
+                
+                if (vehicleLists == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return vehicleLists.Select(vehicle => new Dto.Get
+                    {
+                        vehicle_created_at = vehicle.vehicle_created_at,
+                        vehicle_created_by = vehicle.vehicle_created_by,
+                        vehicle_driver_id = vehicle.vehicle_id,
+                        vehicle_id = vehicle.vehicle_id,
+                        vehicle_model = vehicle.vehicle_model,
+                        vehicle_plat_no = vehicle.vehicle_plat_no,
+                        vehicle_status = vehicle.vehicle_status,
+                        vehicle_updated_at = vehicle.vehicle_created_at,
+                        vehicle_updated_by = vehicle.vehicle_updated_by
+                    }).ToList();
+                }
+            }
             public static async Task<Dto.Get> ReadSingleById(Vehicle_Context vehicle_Context, Guid vehicle_id)
             {
                 Vehicle vehicle = vehicle_Context.Vehicle.Where(x => x.vehicle_id.Equals(vehicle_id)).FirstOrDefault<Vehicle>();

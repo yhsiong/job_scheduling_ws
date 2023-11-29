@@ -107,11 +107,8 @@ namespace Job_Scheduling.Controllers
             try
             {
                 var url = "https://developers.onemap.sg/commonapi/search?searchVal="+ address + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
-
                 var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-
                 httpRequest.Accept = "application/json";
-
 
                 var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
@@ -127,40 +124,32 @@ namespace Job_Scheduling.Controllers
                             longtitude = jResult.results[0]["LONGTITUDE"].ToString()
                         });
                     }
-                    else {
+                    else 
+                    {
                         return new JsonResult(new { postal_code = "Address not found"});
                     } 
-
-                }
-
-                
+                }                
             }
             catch (Exception e)
             {
                 return new JsonResult("OOPs, something went wrong.\n" + e);
             }
-
         }
 
         [HttpGet]
         [Route("getLongLat")]
         public IActionResult getLongLat(string postalCode)
-        {
-            // get user & Password
+        { 
             try
             {
                 var url = "https://developers.onemap.sg/commonapi/search?searchVal=" + postalCode + "&returnGeom=Y&getAddrDetails=Y&pageNum=1";
-
                 var httpRequest = (HttpWebRequest)WebRequest.Create(url);
-
                 httpRequest.Accept = "application/json";
-
 
                 var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
                 using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
                 {
                     var result = streamReader.ReadToEnd();
-
                     var jResult = JsonConvert.DeserializeObject<dynamic>(result);
                     if (jResult.results.Count > 0)
                     {
@@ -168,22 +157,17 @@ namespace Job_Scheduling.Controllers
                             latitude = jResult.results[0]["LATITUDE"].ToString(),
                             longtitude = jResult.results[0]["LONGTITUDE"].ToString(),
                         });
-                    }
-                    
+                    }                   
                     else
                     {
                         return new JsonResult(new { postal_code = "Address not found" });
                     }
-
                 }
-
-
             }
             catch (Exception e)
             {
                 return new JsonResult("OOPs, something went wrong.\n" + e);
-            }
-
+            } 
         }
 
         [HttpGet]
@@ -191,12 +175,10 @@ namespace Job_Scheduling.Controllers
         public async Task<IActionResult> checkCloseById(string job_id)
         {
             List<Job_Task.Dto.Get> jobTasks = await Job_Task.Operations.ReadSingleActiveByJobId(_Job_Context, Guid.Parse(job_id));
-
             if (jobTasks == null || jobTasks.Count == 0)
             {
                 Job job = await Job.Operations.ReadSingleById(_Job_Context, Guid.Parse(job_id));
-                Job.Dto.Put dtoJob = new Job.Dto.Put();
-                
+                Job.Dto.Put dtoJob = new Job.Dto.Put();               
                 dtoJob.job_remark = job.job_remark;
                 dtoJob.job_id = job.job_id;
                 dtoJob.job_status = "Completed";
@@ -211,9 +193,7 @@ namespace Job_Scheduling.Controllers
             {
                 return StatusCode(404, string.Format("Could not find config"));
             }
-        }
-
-        
+        } 
         #endregion
         #region job task
         [HttpGet]

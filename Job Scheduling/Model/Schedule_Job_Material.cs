@@ -1,6 +1,8 @@
-﻿using Job_Scheduling.Database;
+﻿using Dapper;
+using Job_Scheduling.Database;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 
 namespace Job_Scheduling.Model
 {
@@ -120,6 +122,46 @@ namespace Job_Scheduling.Model
                     }).ToList();
                      
                 }
+            }
+            public static async void removeLines(string connString, string schedule_job_id)
+            {
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("delete from Schedule_Job_Material where sjm_schedule_job_id=@sjm_schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@sjm_schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    cm.ExecuteNonQuery();
+                    connection.Close();
+                } 
+            }
+            public static async Task<List<dynamic>> ReadScheduleJobMaterialsCustom(string connString, string schedule_job_id)
+            {
+                List<dynamic> schedulejobmaterials = new List<dynamic>();
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select *,sjm_quantity as material_quantity from schedule_job_material inner join material on material_id=sjm_material_id where sjm_schedule_job_id=@schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejobmaterial = parser(sdr);
+                            schedulejobmaterials.Add(schedulejobmaterial);
+                        }
+                    }
+                }
+                return schedulejobmaterials;
             }
         }
     }

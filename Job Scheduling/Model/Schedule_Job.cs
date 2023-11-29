@@ -1,6 +1,9 @@
-﻿using Job_Scheduling.Database;
+﻿using Dapper;
+using Job_Scheduling.Database;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.SqlClient;
 
 namespace Job_Scheduling.Model
 {
@@ -118,6 +121,78 @@ namespace Job_Scheduling.Model
                     }).ToList();
 
                 }
+            }
+
+            public static async Task<List<dynamic>> ReadScheduleJobDetailsCustom(string connString, string schedule_id)
+            {
+                List<dynamic> schedulejobs = new List<dynamic>();
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from[Schedule_job] right join vehicle on vehicle_id =[Schedule_job].schedule_job_vehicle_id " +
+                    " inner join job on job_id =[Schedule_job].schedule_job_job_id where schedule_job_schedule_id=@schedule_job_schedule_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+                    
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejob = parser(sdr);
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    connection.Close();
+
+                    connection.Open();
+                    //unscheduled job
+                    cm = new SqlCommand("select *, 'Z_Unassigned Job' as vehicle_plat_no from job where job_status='Active' and job_id not in (select schedule_job_job_id from Schedule_job  where schedule_job_schedule_id = @schedule_job_schedule_id)", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_schedule_id", schedule_id);
+                    sdr = cm.ExecuteReader();
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejob = parser(sdr);
+                            schedulejobs.Add(schedulejob);
+                        }
+                    }
+                    connection.Close();                     
+                }
+                return schedulejobs;
+            }
+            public static async Task<List<dynamic>> ReadScheduleJobTasksCustom(string connString, string schedule_job_id)
+            {
+                List<dynamic> schedulejobtasks = new List<dynamic>();
+
+                using (SqlConnection connection = new SqlConnection(connString))
+                {
+                    // Creating SqlCommand objcet   
+                    SqlCommand cm = new SqlCommand("select * from job_task inner join schedule_job on job_task_job_id=schedule_job_job_id where job_task_status='Active' and schedule_job_id=@schedule_job_id", connection);
+                    cm.Parameters.AddWithValue("@schedule_job_id", schedule_job_id);
+                    // Opening Connection  
+                    connection.Open();
+                    // Executing the SQL query  
+                    SqlDataReader sdr = cm.ExecuteReader();
+
+                    if (sdr.HasRows)
+                    {
+                        while (sdr.Read())
+                        {
+                            var parser = sdr.GetRowParser<dynamic>();
+                            dynamic schedulejobtask = parser(sdr);
+                            schedulejobtasks.Add(schedulejobtask);
+                        }
+                    }
+                    connection.Close(); 
+                }
+                return schedulejobtasks;
             }
         }
     }
