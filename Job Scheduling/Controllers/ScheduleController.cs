@@ -606,7 +606,7 @@ namespace Job_Scheduling.Controllers
                                 schedule_job.schedule_job_created_at = currentDt;
                                 schedule_job.schedule_job_created_by = "";
 
-                                await Schedule_Job.Operations.Create(_Schedule_Context, schedule_job);
+                                _Schedule_Context.Schedule_Job.Add(schedule_job); 
                             }
                         }
                     }
@@ -615,7 +615,7 @@ namespace Job_Scheduling.Controllers
                     schedule.schedule_status = "Completed";
                     schedule.schedule_updated_by = "";
                     schedule.schedule_updated_at = DateTime.Now;
-                    _Schedule_Context.Update(schedule);
+                    _Schedule_Context.Schedule.Update(schedule);
                     _Schedule_Context.SaveChanges();
                 }
                 return new JsonResult(carJobs);
