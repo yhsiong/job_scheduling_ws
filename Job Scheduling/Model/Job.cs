@@ -95,6 +95,32 @@ namespace Job_Scheduling.Model
                     return false;
                 }
             }
+            public static async Task<bool> UpdateRange(Job_Context job_Context, List<Job.Dto.Put> jobSchemes)
+            {
+                try
+                {
+                    foreach (Job.Dto.Put jobScheme in jobSchemes)
+                    {
+                        Job dtoJob = job_Context.Job.Where(x => x.job_id.Equals(jobScheme.job_id)).FirstOrDefault();
+                        dtoJob.job_start_date = jobScheme.job_start_date;
+                        dtoJob.job_end_date = jobScheme.job_end_date;
+                        dtoJob.job_status = jobScheme.job_status;
+                        dtoJob.job_remark = jobScheme.job_remark;
+                        dtoJob.job_updated_at = jobScheme.job_updated_at;
+                        dtoJob.job_updated_by = jobScheme.job_updated_by;
+                        dtoJob.job_sales_agent = jobScheme.job_sales_agent;
+
+                        job_Context.Job.Update(dtoJob);
+                    }
+                    
+                    await job_Context.SaveChangesAsync();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
 
             public static async Task<List<Dto.Get>> ReadAll(Job_Context job_Context)
             {
@@ -123,6 +149,44 @@ namespace Job_Scheduling.Model
                         job_remark = job.job_remark,
                         job_status=job.job_status,
                         job_updated_at=job.job_updated_at,
+                        job_updated_by = job.job_updated_by,
+                        job_start_date = job.job_start_date,
+                        job_end_date = job.job_end_date,
+                        job_customer_contact_no = job.job_customer_contact_no,
+                        job_customer_contact_name = job.job_customer_contact_name,
+                        job_sales_agent = job.job_sales_agent,
+                        job_task_status = Operations.getTaskStatus(job_Context, job.job_id)
+
+                    }).ToList();
+                }
+            }
+            public static async Task<List<Dto.Get>> ReadAllPending(Job_Context job_Context,DateTime today)
+            {
+                List<Job> jobLists = job_Context.Job.Where(x => x.job_status.Equals("Pending") && today >= x.job_start_date).ToList();
+
+                if (jobLists == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return jobLists.Select(job => new Dto.Get
+                    {
+                        job_address = job.job_address,
+                        job_created_at = job.job_created_at,
+                        job_created_by = job.job_created_by,
+                        job_customer_code = job.job_customer_code,
+                        job_customer_name = job.job_customer_name,
+                        job_entity_name = job.job_entity_name,
+                        job_id = job.job_id,
+                        job_latitude = job.job_latitude,
+                        job_longtitude = job.job_longtitude,
+                        job_no = job.job_no,
+                        job_postal_code = job.job_postal_code,
+                        job_quotation_no = job.job_quotation_no,
+                        job_remark = job.job_remark,
+                        job_status = job.job_status,
+                        job_updated_at = job.job_updated_at,
                         job_updated_by = job.job_updated_by,
                         job_start_date = job.job_start_date,
                         job_end_date = job.job_end_date,

@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using Castle.MicroKernel.Registration;
+using Dapper;
 using Job_Scheduling.Database;
 using Job_Scheduling.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +15,14 @@ namespace Job_Scheduling.Controllers
     {
         private Job_Context _Job_Context;
         private string _connStr = string.Empty;
+        private string _accessToken = string.Empty;
         private readonly ILogger<JobController> _logger;
         public JobController(Job_Context job_Context,ILogger<JobController> logger, IConfiguration configuration)
         {
             _Job_Context = job_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
+            _accessToken = configuration.GetConnectionString("AccessToken"); 
         }
         #region job
         [HttpGet]
@@ -72,7 +75,7 @@ namespace Job_Scheduling.Controllers
             job.job_id = new Guid();
             job.job_no = await Job.Operations.generateJobNo(_Job_Context);
             job.job_created_at = DateTime.Now;
-            job.job_status = "Active";
+            job.job_status = (job.job_created_at >= job.job_start_date)? "Active" : "Pending";
             bool status = await Job.Operations.Create(_Job_Context, job);
             if (status)
             {
@@ -99,7 +102,33 @@ namespace Job_Scheduling.Controllers
                 return StatusCode(404, string.Format("Could not find config"));
             }
         }
-         
+
+        [HttpGet]
+        [Route("cronjob")]
+        public async Task<IActionResult> jobChecker(string accessCode)
+        {
+            if (accessCode == _accessToken)
+            {
+                List<Job.Dto.Get> jobs = await Job.Operations.ReadAllPending(_Job_Context, DateTime.Now);
+                List<Job.Dto.Put> updJobs = new List<Job.Dto.Put>();
+                for (int i = 0; i < jobs.Count; i++)
+                {
+                    jobs[i].job_status = "Active";
+                    jobs[i].job_updated_at = DateTime.Now;
+
+                    Job.Dto.Put updJob = JsonConvert.DeserializeObject<Job.Dto.Put>(JsonConvert.SerializeObject(jobs[i]));
+                    updJobs.Add(updJob);
+                } 
+                 
+                Job.Operations.UpdateRange(_Job_Context, updJobs);
+
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404, "Error!");
+            }
+        }
         [HttpGet]
         [Route("getpostalcode")]
         public IActionResult getPostalCode(string address)

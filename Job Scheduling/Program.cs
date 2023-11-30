@@ -85,7 +85,7 @@ app.UseEndpoints(endpoints =>
 });
 var manager = new RecurringJobManager(); 
 //manager.AddOrUpdate("some-id", "", Cron.Yearly());
- RecurringJob.AddOrUpdate(
-    "myrecurringjob",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?schedulerCode=hangfireScheduler"), Cron.Daily(18,0), TimeZoneInfo.Local);
- 
+RecurringJob.AddOrUpdate("schedulerRoute",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?accessCode=4gTq7qh6U53GrBPUmbRPgrXgZ"), Cron.Daily(18,0), TimeZoneInfo.Local);
+RecurringJob.AddOrUpdate("jobChecker", () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronJob/?accessCode=4gTq7qh6U53GrBPUmbRPgrXgZ"), Cron.Daily(1, 0), TimeZoneInfo.Local);
+
 app.Run(); 

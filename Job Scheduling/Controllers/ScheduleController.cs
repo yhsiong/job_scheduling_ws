@@ -17,6 +17,7 @@ namespace Job_Scheduling.Controllers
         private Schedule_Context _Schedule_Context;
         private Vehicle_Context _Vehicle_Context;
         private string _connStr = string.Empty;
+        private string _accessToken = string.Empty;
         private readonly ILogger<ScheduleController> _logger;
         public ScheduleController(Job_Context job_Context, Schedule_Context schedule_Context, Vehicle_Context vehicle_Context, ILogger<ScheduleController> logger, IConfiguration configuration)
         {
@@ -25,6 +26,7 @@ namespace Job_Scheduling.Controllers
             _Vehicle_Context = vehicle_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
+            _accessToken = configuration.GetConnectionString("AccessToken");
         }
         #region schedule
         [HttpGet]
@@ -71,11 +73,16 @@ namespace Job_Scheduling.Controllers
         }
         [HttpGet]
         [Route("cronschedule")]
-        public async Task<IActionResult> insertCronSchedule(string schedulerCode)
+        public async Task<IActionResult> insertCronSchedule(string accessCode)
         {
-            if (schedulerCode == "hangfireScheduler")
+            // run schedule for tomorrow
+            DateTime tomorrow = DateTime.Now.AddDays(1);
+            DayOfWeek day = tomorrow.DayOfWeek;
+            
+            // skip if invalid passcode and non working day
+            if (accessCode == _accessToken && day != DayOfWeek.Sunday)
             {
-                string schedule_date = DateTime.Now.ToString("yyyy-MM-dd");
+                string schedule_date = tomorrow.ToString("yyyy-MM-dd");
                 Schedule.Dto.Get schedule = await Schedule.Operations.ReadSingleByDate(_Schedule_Context, schedule_date);
                 if (schedule == null)
                 {
@@ -607,6 +614,7 @@ namespace Job_Scheduling.Controllers
                                 schedule_job.schedule_job_created_by = "";
 
                                 _Schedule_Context.Schedule_Job.Add(schedule_job); 
+
                             }
                         }
                     }
