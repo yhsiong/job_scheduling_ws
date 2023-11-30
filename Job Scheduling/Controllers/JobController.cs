@@ -110,18 +110,19 @@ namespace Job_Scheduling.Controllers
             if (accessCode == _accessToken)
             {
                 List<Job.Dto.Get> jobs = await Job.Operations.ReadAllPending(_Job_Context, DateTime.Now);
-                List<Job.Dto.Put> updJobs = new List<Job.Dto.Put>();
-                for (int i = 0; i < jobs.Count; i++)
-                {
-                    jobs[i].job_status = "Active";
-                    jobs[i].job_updated_at = DateTime.Now;
+                if(jobs.Count > 0) { 
+                    List<Job.Dto.Put> updJobs = new List<Job.Dto.Put>();
+                    for (int i = 0; i < jobs.Count; i++)
+                    {
+                        jobs[i].job_status = "Active";
+                        jobs[i].job_updated_at = DateTime.Now;
 
-                    Job.Dto.Put updJob = JsonConvert.DeserializeObject<Job.Dto.Put>(JsonConvert.SerializeObject(jobs[i]));
-                    updJobs.Add(updJob);
-                } 
+                        Job.Dto.Put updJob = JsonConvert.DeserializeObject<Job.Dto.Put>(JsonConvert.SerializeObject(jobs[i]));
+                        updJobs.Add(updJob);
+                    } 
                  
-                Job.Operations.UpdateRange(_Job_Context, updJobs);
-
+                    Job.Operations.UpdateRange(_Job_Context, updJobs);
+                }
                 return StatusCode(200);
             }
             else

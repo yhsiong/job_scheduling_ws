@@ -531,37 +531,38 @@ namespace Job_Scheduling.Controllers
 
                 int maxJobTake = (jobs.Count / vehicles.Count) + 1;
 
-                    
-                //729908 office postal code
-                string token = this.getOneMapToken();
-                dynamic coords = this.getLongLat("729908");
+                if (maxJobTake > 0)
+                {
+                    //729908 office postal code
+                    string token = this.getOneMapToken();
+                    dynamic coords = this.getLongLat("729908");
 
-                for (int i = 0; i < vehicles.Count; i++)
-                {
-                    Dictionary<string, string> carLastPoint = new Dictionary<string, string>();
-                    if (!carLastPoints.ContainsKey(vehicles[i].vehicle_plat_no))
+                    for (int i = 0; i < vehicles.Count; i++)
                     {
-                        carLastPoint.Add("latitude", coords.Value.latitude);
-                        carLastPoint.Add("longtitude", coords.Value.longtitude);
-                        carLastPoints.Add(vehicles[i].vehicle_plat_no, carLastPoint);
-                        vehicleIDs.Add(vehicles[i].vehicle_plat_no, vehicles[i].vehicle_id);
-                    }
-                }
-                for (int k = 0; k < jobs.Count; k++)
-                {
-                    string jobPostalCode = jobs[k].job_postal_code;
-                    dynamic jobCoords = this.getLongLat(jobPostalCode);
-                    string endPoint = jobCoords.Value.latitude + "," + jobCoords.Value.longtitude;
-                    float shortest = 0;
-                    string winnerPlatNo = ""; 
-                      
-                    foreach (KeyValuePair<string, Dictionary<string, string>> car in carLastPoints)
-                    {
-                        string carPlat = car.Key;
-                        if (carJobs.ContainsKey(carPlat) && carJobs[carPlat].Count > maxJobTake)
+                        Dictionary<string, string> carLastPoint = new Dictionary<string, string>();
+                        if (!carLastPoints.ContainsKey(vehicles[i].vehicle_plat_no))
                         {
-                            continue;
+                            carLastPoint.Add("latitude", coords.Value.latitude);
+                            carLastPoint.Add("longtitude", coords.Value.longtitude);
+                            carLastPoints.Add(vehicles[i].vehicle_plat_no, carLastPoint);
+                            vehicleIDs.Add(vehicles[i].vehicle_plat_no, vehicles[i].vehicle_id);
                         }
+                    }
+                    for (int k = 0; k < jobs.Count; k++)
+                    {
+                        string jobPostalCode = jobs[k].job_postal_code;
+                        dynamic jobCoords = this.getLongLat(jobPostalCode);
+                        string endPoint = jobCoords.Value.latitude + "," + jobCoords.Value.longtitude;
+                        float shortest = 0;
+                        string winnerPlatNo = "";
+
+                        foreach (KeyValuePair<string, Dictionary<string, string>> car in carLastPoints)
+                        {
+                            string carPlat = car.Key;
+                            if (carJobs.ContainsKey(carPlat) && carJobs[carPlat].Count > maxJobTake)
+                            {
+                                continue;
+                            }
                             string longtitude = car.Value["longtitude"];
                             string latitude = car.Value["latitude"];
 
@@ -572,63 +573,67 @@ namespace Job_Scheduling.Controllers
                                 shortest = float.Parse(calculatedDistance.Value.distance);
                                 winnerPlatNo = carPlat;
                             }
-                        
-                    }
 
-                    if (carJobs.ContainsKey(winnerPlatNo))
-                    {
-                        List<string> carJob = carJobs[winnerPlatNo];
-                        carJob.Add(jobs[k].job_id.ToString());
-                        
-                    }
-                    else
-                    {
-                        List<string> carJob = new List<string> ();
-                        carJob.Add(jobs[k].job_id.ToString());
-                        carJobs.Add(winnerPlatNo, carJob);
-                    }
-                    Dictionary<string, string> carLastPoint = carLastPoints[winnerPlatNo];
-                    carLastPoint["latitude"] = jobCoords.Value.latitude;
-                    carLastPoint["longtitude"] = jobCoords.Value.longtitude;
-                    carLastPoints[winnerPlatNo] = carLastPoint;
+                        }
 
-                }
-
-
-                #region loop to insert job
-                if (carJobs.Count > 0)
-                {
-                    DateTime currentDt = DateTime.Now;
-                    foreach(KeyValuePair<string,List<string>> car in carJobs)
-                    {
-                        for (int z = 0; z < car.Value.Count; z++)
+                        if (carJobs.ContainsKey(winnerPlatNo))
                         {
-                            using (SqlConnection connection = new SqlConnection(_connStr))
+                            List<string> carJob = carJobs[winnerPlatNo];
+                            carJob.Add(jobs[k].job_id.ToString());
+
+                        }
+                        else
+                        {
+                            List<string> carJob = new List<string>();
+                            carJob.Add(jobs[k].job_id.ToString());
+                            carJobs.Add(winnerPlatNo, carJob);
+                        }
+                        Dictionary<string, string> carLastPoint = carLastPoints[winnerPlatNo];
+                        carLastPoint["latitude"] = jobCoords.Value.latitude;
+                        carLastPoint["longtitude"] = jobCoords.Value.longtitude;
+                        carLastPoints[winnerPlatNo] = carLastPoint;
+
+                    }
+
+
+                    #region loop to insert job
+                    if (carJobs.Count > 0)
+                    {
+                        DateTime currentDt = DateTime.Now;
+                        foreach (KeyValuePair<string, List<string>> car in carJobs)
+                        {
+                            for (int z = 0; z < car.Value.Count; z++)
                             {
-                                Schedule_Job.Dto.Post schedule_job = new Schedule_Job.Dto.Post();
-                                schedule_job.schedule_job_schedule_id = Guid.Parse(schedule_id);
-                                schedule_job.schedule_job_job_id = Guid.Parse(car.Value[z]);
-                                schedule_job.schedule_job_order = z;
-                                schedule_job.schedule_job_vehicle_id = vehicleIDs[car.Key];
-                                schedule_job.schedule_job_created_at = currentDt;
-                                schedule_job.schedule_job_created_by = "";
+                                using (SqlConnection connection = new SqlConnection(_connStr))
+                                {
+                                    Schedule_Job.Dto.Post schedule_job = new Schedule_Job.Dto.Post();
+                                    schedule_job.schedule_job_schedule_id = Guid.Parse(schedule_id);
+                                    schedule_job.schedule_job_job_id = Guid.Parse(car.Value[z]);
+                                    schedule_job.schedule_job_order = z;
+                                    schedule_job.schedule_job_vehicle_id = vehicleIDs[car.Key];
+                                    schedule_job.schedule_job_created_at = currentDt;
+                                    schedule_job.schedule_job_created_by = "";
 
-                                _Schedule_Context.Schedule_Job.Add(schedule_job); 
+                                    _Schedule_Context.Schedule_Job.Add(schedule_job);
 
+                                }
                             }
                         }
+
+                        Schedule schedule = _Schedule_Context.Schedule.Where(x => x.schedule_id.Equals(Guid.Parse(schedule_id))).FirstOrDefault();
+                        schedule.schedule_status = "Completed";
+                        schedule.schedule_updated_by = "";
+                        schedule.schedule_updated_at = DateTime.Now;
+                        _Schedule_Context.Schedule.Update(schedule);
+                        _Schedule_Context.SaveChanges();
                     }
+                    return new JsonResult(carJobs);
 
-                    Schedule schedule = _Schedule_Context.Schedule.Where(x => x.schedule_id.Equals(Guid.Parse(schedule_id))).FirstOrDefault();
-                    schedule.schedule_status = "Completed";
-                    schedule.schedule_updated_by = "";
-                    schedule.schedule_updated_at = DateTime.Now;
-                    _Schedule_Context.Schedule.Update(schedule);
-                    _Schedule_Context.SaveChanges();
+                    #endregion
                 }
-                return new JsonResult(carJobs);
-
-                #endregion
+                else {
+                    return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
+                }
             }
             catch (Exception e)
             {
