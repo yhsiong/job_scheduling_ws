@@ -55,4 +55,3 @@ For this project it consist of 2 workflow:
 2. Artifacts Cleanup : shedule to run every hour to clean artifacts file left after deployment.
 
 Workflow can be trigger manually and check the status under Project Repository > Actions tab.
-
