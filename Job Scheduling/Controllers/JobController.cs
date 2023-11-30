@@ -22,7 +22,7 @@ namespace Job_Scheduling.Controllers
             _Job_Context = job_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
-            _accessToken = configuration.GetConnectionString("AccessToken"); 
+            _accessToken = configuration.GetValue<string>("AccessToken");
         }
         #region job
         [HttpGet]

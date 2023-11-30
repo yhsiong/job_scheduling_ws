@@ -26,7 +26,7 @@ namespace Job_Scheduling.Controllers
             _Vehicle_Context = vehicle_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
-            _accessToken = configuration.GetConnectionString("AccessToken");
+            _accessToken = configuration.GetValue<string>("AccessToken");
         }
         #region schedule
         [HttpGet]
