@@ -46,21 +46,21 @@ jobs:
         with:
           pathtosettingsfile: '${{ github.workspace }}/Job Scheduling/appsettings.json'
           name: "DefaultConnection"
-          connectionstring: '${{ secrets.DefaultConnection_KEY }}'
+          connectionstring: '${{ secrets.DEFAULTCONNECTION }}'
 
       - name: edit Hangfire connection string
         uses: benday-inc/edit-dbconnstr-in-appsettings@main
         with:
           pathtosettingsfile: '${{ github.workspace }}/Job Scheduling/appsettings.json'
           name: "HangfireConnection"
-          connectionstring: '${{ secrets.HangfireConnection_KEY }}'
+          connectionstring: '${{ secrets.HANGFIRECONNECTION }}'
 
       - name: edit AutoCountConnection connection string
         uses: benday-inc/edit-dbconnstr-in-appsettings@main
         with:
           pathtosettingsfile: '${{ github.workspace }}/Job Scheduling/appsettings.json'
           name: "AutoCountConnection"
-          connectionstring: '${{ secrets.AutoCountConnection_KEY }}'
+          connectionstring: '${{ secrets.AUTOCOUNTCONNECTION }}'
 
       - name: Create Build Directory
         run: mkdir _build  
