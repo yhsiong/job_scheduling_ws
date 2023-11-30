@@ -2,10 +2,13 @@
 using Dapper;
 using Job_Scheduling.Database;
 using Job_Scheduling.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Data.SqlClient;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
@@ -23,6 +26,7 @@ namespace Job_Scheduling.Controllers
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
             _accessToken = configuration.GetValue<string>("AccessToken");
+
         }
         #region job
         [HttpGet]
@@ -75,6 +79,7 @@ namespace Job_Scheduling.Controllers
             job.job_id = new Guid();
             job.job_no = await Job.Operations.generateJobNo(_Job_Context);
             job.job_created_at = DateTime.Now;
+            job.job_created_by = UserController.checkUserId(HttpContext);
             job.job_status = (job.job_created_at >= job.job_start_date)? "Active" : "Pending";
             bool status = await Job.Operations.Create(_Job_Context, job);
             if (status)
@@ -90,6 +95,7 @@ namespace Job_Scheduling.Controllers
         [Route("job")]
         public async Task<IActionResult> updateJob(Job.Dto.Put job)
         { 
+            job.job_created_by = UserController.checkUserId(HttpContext);
             job.job_updated_at = DateTime.Now;
             bool status = await Job.Operations.Update(_Job_Context,job);
 
@@ -104,6 +110,7 @@ namespace Job_Scheduling.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("cronjob")]
         public async Task<IActionResult> jobChecker(string accessCode)
         {
@@ -212,7 +219,7 @@ namespace Job_Scheduling.Controllers
                 dtoJob.job_remark = job.job_remark;
                 dtoJob.job_id = job.job_id;
                 dtoJob.job_status = "Completed";
-                dtoJob.job_updated_by = job.job_updated_by;
+                dtoJob.job_updated_by = UserController.checkUserId(HttpContext);
                 dtoJob.job_updated_at = DateTime.Now;
 
                 bool status = await Job.Operations.Update(_Job_Context, dtoJob);
@@ -261,6 +268,7 @@ namespace Job_Scheduling.Controllers
         {
             jobTask.job_task_id = new Guid();
             jobTask.job_task_created_at = DateTime.Now;
+            jobTask.job_task_created_by = UserController.checkUserId(HttpContext);
             jobTask.job_task_status = "Active";
             bool status = await Job_Task.Operations.Create(_Job_Context, jobTask);
             if (status)
@@ -276,6 +284,7 @@ namespace Job_Scheduling.Controllers
         [Route("jobTask")]
         public async Task<IActionResult> updateJobTask(Job_Task.Dto.Put jobTask)
         {
+            jobTask.job_task_updated_by = UserController.checkUserId(HttpContext);
             jobTask.job_task_updated_at = DateTime.Now;
             bool status = await Job_Task.Operations.Update(_Job_Context, jobTask);
 

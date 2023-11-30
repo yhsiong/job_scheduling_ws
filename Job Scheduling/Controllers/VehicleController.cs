@@ -74,6 +74,7 @@ namespace Job_Scheduling.Controllers
         {
             vehicle.vehicle_id = new Guid();
             vehicle.vehicle_created_at = DateTime.Now;
+            vehicle.vehicle_created_by = UserController.checkUserId(HttpContext);
             bool status = await Vehicle.Operations.Create(_Vehicle_Context, vehicle);
             if (status)
             {
@@ -89,6 +90,7 @@ namespace Job_Scheduling.Controllers
         [Route("vehicle")]
         public async Task<IActionResult> updateVehicle(Vehicle.Dto.Put vehicle)
         {
+            vehicle.vehicle_updated_by = UserController.checkUserId(HttpContext);
             vehicle.vehicle_updated_at = DateTime.Now;
             bool status = await Vehicle.Operations.Update(_Vehicle_Context, vehicle);
 

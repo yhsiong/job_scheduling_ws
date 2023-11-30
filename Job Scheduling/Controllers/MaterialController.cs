@@ -57,6 +57,7 @@ namespace Job_Scheduling.Controllers
         {
             material.material_id = new Guid();
             material.material_created_at = DateTime.Now;
+            material.material_created_by = UserController.checkUserId(HttpContext);
             bool status = await Material.Operations.Create(_Material_Context, material);
             if (status)
             {
@@ -72,6 +73,7 @@ namespace Job_Scheduling.Controllers
         [Route("material")]
         public async Task<IActionResult> updateMaterial(Material.Dto.Put material)
         {
+            material.material_updated_by = UserController.checkUserId(HttpContext);
             material.material_updated_at = DateTime.Now;
             bool status = await Material.Operations.Update(_Material_Context, material);
 

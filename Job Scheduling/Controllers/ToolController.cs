@@ -58,6 +58,7 @@ namespace Job_Scheduling.Controllers
         {
             tool.tool_id = new Guid();
             tool.tool_created_at = DateTime.Now;
+            tool.tool_created_by = UserController.checkUserId(HttpContext);
             bool status = await Tool.Operations.Create(_Tool_Context, tool);
             if (status)
             {
@@ -73,6 +74,7 @@ namespace Job_Scheduling.Controllers
         [Route("tool")]
         public async Task<IActionResult> updateVehicle(Tool.Dto.Put tool)
         {
+            tool.tool_updated_by = UserController.checkUserId(HttpContext);
             tool.tool_updated_at = DateTime.Now;
             bool status = await Tool.Operations.Update(_Tool_Context, tool);
 

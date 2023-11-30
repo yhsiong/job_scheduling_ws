@@ -2,10 +2,12 @@
 using Hangfire.Common;
 using Job_Scheduling.Database;
 using Job_Scheduling.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Data.SqlClient;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using Z.EntityFramework.Plus;
 
@@ -26,7 +28,7 @@ namespace Job_Scheduling.Controllers
             _Vehicle_Context = vehicle_Context;
             _logger = logger;
             _connStr = configuration.GetConnectionString("DefaultConnection");
-            _accessToken = configuration.GetValue<string>("AccessToken");
+            _accessToken = configuration.GetValue<string>("AccessToken"); 
         }
         #region schedule
         [HttpGet]
@@ -72,6 +74,7 @@ namespace Job_Scheduling.Controllers
             }
         }
         [HttpGet]
+        [AllowAnonymous]
         [Route("cronschedule")]
         public async Task<IActionResult> insertCronSchedule(string accessCode)
         {
@@ -118,6 +121,7 @@ namespace Job_Scheduling.Controllers
         {
             schedule.schedule_id = new Guid();
             schedule.schedule_created_at = DateTime.Now;
+            schedule.schedule_created_by = UserController.checkUserId(HttpContext);
             schedule.schedule_status = "Processing";
             bool status = await Schedule.Operations.Create(_Schedule_Context, schedule);
             if (status)
@@ -134,6 +138,7 @@ namespace Job_Scheduling.Controllers
         [Route("schedule")]
         public async Task<IActionResult> updateSchedule(Schedule.Dto.Put scheduleScheme)   
         {
+            scheduleScheme.schedule_updated_by = UserController.checkUserId(HttpContext);
             scheduleScheme.schedule_updated_at = DateTime.Now;
             bool status = await Schedule.Operations.Update(_Schedule_Context, scheduleScheme);
 
@@ -492,6 +497,7 @@ namespace Job_Scheduling.Controllers
             } 
         }
         #endregion
+
         #region schedule job task
         [HttpGet]
         [Route("schedulejobtaskswithdetails")]
