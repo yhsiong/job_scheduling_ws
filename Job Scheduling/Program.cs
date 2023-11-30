@@ -19,8 +19,9 @@ using Microsoft.OpenApi.Models;
 
 var config = new ConfigurationBuilder()
 		.SetBasePath(Directory.GetCurrentDirectory())
-		.AddJsonFile("appsettings.json", optional: true)
-		.AddCommandLine(args)
+		.AddJsonFile("appsettings.json", optional: false, true)
+        .AddJsonFile("appsettings.Development.json", optional: true, true)
+        .AddCommandLine(args)
 		.Build();
 
 var builder = WebApplication.CreateBuilder(args);
