@@ -632,7 +632,7 @@ namespace Job_Scheduling.Controllers
                     #endregion
                 }
                 else {
-                    return StatusCode(404, string.Format("OOPs, something went wrong.\n" + e));
+                    return StatusCode(404, string.Format("OOPs, something went wrong."));
                 }
             }
             catch (Exception e)
