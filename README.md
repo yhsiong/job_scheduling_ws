@@ -1,18 +1,26 @@
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
-2. [Database Schema](#database-schema)
-3. [Project Structure](#project-structure)
-4. [Swagger](#swagger)
-5. [Hangfire](#hangfire)
-6. [Git Action](#git-action)
+2. [Architecture](#architecture)
+3. [Database Schema](#database-schema)
+4. [Project Structure](#project-structure)
+5. [Swagger](#swagger)
+6. [Hangfire](#hangfire)
+7. [Git Action](#git-action)
+
+## Architecture
+![Screenshot](./doc/architecture.png)
+
+Note: No static ip, Synology NAS connect to Dynamic DNS to route the traffic to IIS. Synology NAS also hosted the office file server and openVPN server.
 
 ## Prerequisites
 Development Setup
 - .Net 6
+- Visual studio
 
 Production Setup
 - .Net 6
 - .NET Core Hosting Bundle
+- Visual studio
 - Visual C++ Redistributable
 - IIS URL Rewrite
 
