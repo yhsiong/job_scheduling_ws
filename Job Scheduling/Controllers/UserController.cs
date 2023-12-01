@@ -40,7 +40,7 @@ namespace Job_Scheduling.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string username, string password)
         {
-            User.Dto.Get user = await Job_Scheduling.Model.User.Operations.ReadAuthUser(_User_Context, username, password);
+            User.Dto.Get user = await Job_Scheduling.Model.User.Operations.ReadAuthUser(_User_Context, username, passwordHash(password));
             if (user == null)
             {
                 return StatusCode(404, string.Format("Could not find config"));

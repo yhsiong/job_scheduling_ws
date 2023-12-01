@@ -299,7 +299,18 @@ namespace Job_Scheduling.Controllers
                             newScheduleJob.schedule_job_remark = schedule.Value[i].schedule_job_remark ?? "";
                             await Schedule_Job.Operations.Create(_Schedule_Context, newScheduleJob);
                             dynamic _schedule = schedule.Value[i];
-                            Guid old_schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
+
+                            if (_schedule["schedule_job_id"] != null && !string.IsNullOrEmpty(_schedule["schedule_job_id"].ToString()))
+                            {
+                                Guid old_schedule_job_id = Guid.Parse(_schedule["schedule_job_id"].ToString());
+                                // clear all tools
+                                Schedule_Job_Tool.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
+                                // clear all material
+                                Schedule_Job_Material.Operations.removeLines(_connStr, old_schedule_job_id.ToString()); 
+                                // clear all worker
+                                Schedule_Job_Worker.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
+                            }
+                            
                             Guid new_schedule_job_id = newScheduleJob.schedule_job_id;
 
                             if (_schedule["tools"] != null)
@@ -307,10 +318,7 @@ namespace Job_Scheduling.Controllers
                                 var tools = _schedule["tools"];
                                 if (tools.Count > 0)
                                 {
-                                    // clear all tools
-                                    Schedule_Job_Tool.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
                                     Schedule_Job_Tool.Dto.Post scheduleTool = new Schedule_Job_Tool.Dto.Post();
-
                                     for (int i1 = 0; i1 < tools.Count; i1++)
                                     {
                                         scheduleTool = new Schedule_Job_Tool.Dto.Post();
@@ -323,16 +331,13 @@ namespace Job_Scheduling.Controllers
                                         await Schedule_Job_Tool.Operations.Create(_Schedule_Context, scheduleTool);
                                     }
                                 }
-
                             }
 
                             if (_schedule["materials"] != null)
                             {
                                 var materials = _schedule["materials"];
                                 if (materials.Count > 0)
-                                {
-                                    // clear all material
-                                    Schedule_Job_Material.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
+                                { 
                                     Schedule_Job_Material.Dto.Post scheduleMaterial = new Schedule_Job_Material.Dto.Post();
                                     for (int i2 = 0; i2 < materials.Count; i2++)
                                     {
@@ -353,8 +358,6 @@ namespace Job_Scheduling.Controllers
                                 var workers = _schedule["workers"];
                                 if (workers.Count > 0)
                                 {
-                                    // clear all worker
-                                    Schedule_Job_Worker.Operations.removeLines(_connStr, old_schedule_job_id.ToString());
                                     Schedule_Job_Worker.Dto.Post scheduleWorker = new Schedule_Job_Worker.Dto.Post();
                                     for (int i3 = 0; i3 < workers.Count; i3++)
                                     {

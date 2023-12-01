@@ -40,7 +40,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setup => {
-
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
         BearerFormat = "JWT",
@@ -106,21 +105,18 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true
     };
 });
-builder.Services.AddAuthorization();
-
+builder.Services.AddAuthorization(); 
 builder.Services.AddHangfireServer();
 var app = builder.Build();
 app.UseSession();
-// Configure the HTTP request pipeline.
-int test = app.Urls.Count();
 
+// enable swagger ui for development mode
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
-
 
 app.MapControllers();
 app.UseCors(MyAllowOrigins);
@@ -136,5 +132,4 @@ var manager = new RecurringJobManager();
 //manager.AddOrUpdate("some-id", "", Cron.Yearly());
 RecurringJob.AddOrUpdate("schedulerRoute",  () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronschedule/?accessCode=4gTq7qh6U53GrBPUmbRPgrXgZ"), Cron.Daily(18,0), TimeZoneInfo.Local);
 RecurringJob.AddOrUpdate("jobChecker", () => new HttpClient().GetAsync(config.GetValue<string>("HostnameStrings") + "/cronJob/?accessCode=4gTq7qh6U53GrBPUmbRPgrXgZ"), Cron.Daily(1, 0), TimeZoneInfo.Local);
-
 app.Run(); 
